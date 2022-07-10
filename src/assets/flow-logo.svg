@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="292" height="160.072" viewBox="0 0 292 160.072">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.182" y1="1.246" x2="1" y2="-0.472" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#49e88d"/>
+      <stop offset="1" stop-color="#b1f9dc"/>
+    </linearGradient>
+  </defs>
+  <g id="flow-logo" transform="translate(-54 -179.964)">
+    <path id="Path_23" data-name="Path 23" d="M24,0S42.5,20,85,20c43.3-.4,61.1-20.435,85-30.123S217.284-20.209,239-20c42.5,0,77,60,77,60h0s-18.5-20-61-20c-42.05-.19-60.99,19.943-85,29.469S137.18,59.862,101,60C58.5,60,24,0,24,0Z" transform="translate(30 200)" fill="url(#linear-gradient)"/>
+    <path id="Path_24" data-name="Path 24" d="M24,0S42.5,20,85,20c43.3-.4,61.1-20.435,85-30.123S217.284-20.209,239-20c42.5,0,77,60,77,60h0s-18.5-20-61-20c-42.05-.19-60.99,19.943-85,29.469S137.18,59.862,101,60C58.5,60,24,0,24,0Z" transform="translate(30 280.036)" fill="url(#linear-gradient)"/>
+  </g>
+</svg>
