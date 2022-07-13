@@ -19,14 +19,7 @@ export const HomeNavBar: React.FC = () => {
 			</HStack>
 			<Spacer />
 			<HStack>
-				<Button
-					variant="solid"
-					bgColor="green.100"
-					textColor="green.400"
-					_hover={{ bgColor: "green.200", textColor: "green.500" }}
-					_active={{ bgColor: "green.300", textColor: "green.600" }}
-					onClick={() => {}}
-				>
+				<Button variant="primary" onClick={() => {}}>
 					Login
 				</Button>
 				<Button

@@ -1,17 +1,17 @@
 import { FaArrowRight } from "react-icons/fa";
 
-import {
-    Box, Button, ButtonGroup, Center, Container, Flex, Heading, HStack, Image, Spacer, VStack
-} from "@chakra-ui/react";
+import { Button, Flex, Heading, HStack, Image, VStack } from "@chakra-ui/react";
 
 import { openModal } from "../../../app/slices/ui/modals";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
-import { HomeFooter } from "./components/HomeFooter";
-import { HomeNavBar } from "./components/HomeNavBar";
+import { HomeFooter } from "./components/LandingFooter";
+import { HomeNavBar } from "./components/LandingNavBar";
 import { LoginModal } from "./components/LoginModal";
+import { ResetPasswordModal } from "./components/ResetPasswordModal";
+import { SignupModal } from "./components/SignupModal";
 
 
-export const HomePage: React.FC = () => {
+export const LandingPage: React.FC = () => {
 	const dispatch = useAppDispatch();
 
 	return (
@@ -38,6 +38,8 @@ export const HomePage: React.FC = () => {
 			</VStack>
 			<HomeFooter />
 			<LoginModal />
+			<SignupModal />
+			<ResetPasswordModal />
 		</>
 	);
 };
