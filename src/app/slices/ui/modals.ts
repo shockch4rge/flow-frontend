@@ -11,13 +11,16 @@ interface UserLoginModalState {}
 
 interface UserSignUpModalState {}
 
+interface ResetPasswordModalState {}
+
 type ModalState = EditCardModalState &
 	UserLoginModalState &
-	UserSignUpModalState & {
+	UserSignUpModalState &
+	ResetPasswordModalState & {
 		open: boolean;
 	};
 
-type ModalTypes = "editCard" | "login" | "signup";
+type ModalTypes = "editCard" | "login" | "signup" | "resetPassword";
 
 const initialState: Record<ModalTypes, ModalState> = {
 	editCard: {
@@ -27,6 +30,9 @@ const initialState: Record<ModalTypes, ModalState> = {
 		open: false,
 	},
 	signup: {
+		open: false,
+	},
+	resetPassword: {
 		open: false,
 	},
 };
