@@ -1,22 +1,19 @@
-import { cacher } from "../../utils/cacherUtils";
+import cacheUtils from "../../utils/cacheUtils";
 import { iCard } from "../../utils/models";
 import api, { ApiTags } from "./api";
 
 
-interface AddCardArgs {
-	folderId: string;
-	name: string;
-}
-
 const cards = api.injectEndpoints({
 	endpoints: builder => ({
-		getFolderCards: builder.query<iCard[], string>({
-			query: folderId => ({
+		getFolderCards: builder.query<iCard[], Pick<iCard, "folderId">>({
+			query: ({ folderId }) => ({
 				url: `/folders/${folderId}/cards`,
 			}),
+
+			providesTags: cacheUtils.providesList(ApiTags.Cards),
 		}),
 
-		addCard: builder.mutation<void, AddCardArgs>({
+		addCard: builder.mutation<void, Pick<iCard, "folderId" | "name">>({
 			query: ({ folderId, name }) => ({
 				url: `/cards`,
 				method: "POST",
@@ -26,26 +23,26 @@ const cards = api.injectEndpoints({
 				},
 			}),
 
-			invalidatesTags: cacher.invalidatesList(ApiTags.Cards),
+			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
 		}),
 
-		deleteCard: builder.mutation<void, string>({
-			query: cardId => ({
+		deleteCard: builder.mutation<void, Pick<iCard, "id">>({
+			query: ({ id: cardId }) => ({
 				url: `/cards/${cardId}`,
 				method: "DELETE",
 			}),
 
-			invalidatesTags: cacher.invalidatesList(ApiTags.Cards),
+			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
 		}),
 
-		moveCard: builder.mutation<void, { cardId: string; folderId: string }>({
-			query: ({ cardId, folderId }) => ({
+		moveCard: builder.mutation<void, Pick<iCard, "id" | "folderId">>({
+			query: ({ id: cardId, folderId }) => ({
 				url: `/cards/${cardId}/move`,
 				method: "PUT",
 				body: { folderId },
 			}),
 
-			invalidatesTags: cacher.invalidatesList(ApiTags.Cards),
+			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
 		}),
 	}),
 });

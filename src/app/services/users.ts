@@ -1,4 +1,4 @@
-import { cacher } from "../../utils/cacherUtils";
+import cacheUtils from "../../utils/cacheUtils";
 import { iUser } from "../../utils/models";
 import api, { ApiTags } from "./api";
 
@@ -9,7 +9,7 @@ interface LoginRequestBody {
 }
 
 const users = api.injectEndpoints({
-    overrideExisting: false,
+	overrideExisting: false,
 
 	endpoints: builder => ({
 		getUser: builder.query<iUser, string>({
@@ -18,7 +18,7 @@ const users = api.injectEndpoints({
 				method: "get",
 			}),
 
-			providesTags: cacher.cacheByIdArg(ApiTags.Users),
+			providesTags: cacheUtils.cacheByIdArg(ApiTags.Users),
 		}),
 
 		loginUser: builder.query<iUser, LoginRequestBody>({
@@ -28,7 +28,15 @@ const users = api.injectEndpoints({
 				data: { email, password },
 			}),
 		}),
+
+		createUser: builder.mutation<iUser, iUser>({
+			query: user => ({
+				url: `/users`,
+				method: "post",
+				data: user,
+			}),
+		}),
 	}),
 });
 
-export const { useGetUserQuery, useLazyGetUserQuery, useLoginUserQuery } = users;
+export const { useGetUserQuery, useCreateUserMutation, useLazyGetUserQuery, useLoginUserQuery } = users;

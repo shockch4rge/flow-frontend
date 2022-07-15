@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { cacher } from "../../utils/cacherUtils";
+import cacheUtils from "../../utils/cacheUtils";
 
 
 export const ApiTags = {
@@ -17,7 +17,7 @@ const api = createApi({
 	}),
 	// compose endpoints later
 	endpoints: () => ({}),
-	tagTypes: [...cacher.defaultTags, ApiTags.Users, ApiTags.Boards, ApiTags.Folders, ApiTags.Cards],
+	tagTypes: [...cacheUtils.defaultTags, ApiTags.Users, ApiTags.Boards, ApiTags.Folders, ApiTags.Cards],
 });
 
 export default api;

@@ -5,12 +5,12 @@ import authSlice from "./slices/auth";
 import boardSlice from "./slices/board";
 import drawerSlice from "./slices/ui/drawers";
 import modalSlice from "./slices/ui/modals";
-import snackSlice from "./slices/ui/snack";
+import toastSlice from "./slices/ui/toast";
 
 
 const uiReducer = combineReducers({
 	[modalSlice.name]: modalSlice.reducer,
-	[snackSlice.name]: snackSlice.reducer,
+	[toastSlice.name]: toastSlice.reducer,
 	[drawerSlice.name]: drawerSlice.reducer,
 });
 

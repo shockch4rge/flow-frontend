@@ -1,22 +1,30 @@
+import cacheUtils from "../../utils/cacheUtils";
 import { iFolder } from "../../utils/models";
-import api from "./api";
+import api, { ApiTags } from "./api";
 
 
 const folders = api.injectEndpoints({
 	endpoints: builder => ({
-		getBoardFolders: builder.query<iFolder[], string>({
-			query: boardId => ({
+		getBoardFolders: builder.query<iFolder[], Pick<iFolder, "boardId">>({
+			query: ({ boardId }) => ({
 				url: `/boards/${boardId}/folders`,
 				method: "get",
 			}),
+
+			providesTags: cacheUtils.providesList(ApiTags.Folders),
 		}),
 
-		addFolder: builder.mutation<void, iFolder>({
-			query: folder => ({
+		addFolder: builder.mutation<void, Pick<iFolder, "name" | "boardId">>({
+			query: ({ name, boardId }) => ({
 				url: `/folders`,
 				method: "POST",
-				body: folder,
+				body: {
+					name,
+					boardId,
+				},
 			}),
+
+			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Folders),
 		}),
 	}),
 });
