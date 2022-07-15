@@ -2,7 +2,7 @@ import { ToastProps } from "@chakra-ui/react";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 
-interface SnackState {
+interface ToastState {
 	content: string;
 	severity: ToastProps["status"];
 	duration: number;
@@ -10,7 +10,7 @@ interface SnackState {
 	open: boolean;
 }
 
-const initialState: SnackState = {
+const initialState: ToastState = {
 	content: "",
 	severity: "success",
 	position: "bottom",
@@ -18,11 +18,11 @@ const initialState: SnackState = {
 	open: false,
 };
 
-const snackSlice = createSlice({
+const toastSlice = createSlice({
 	name: "snack",
 	initialState,
 	reducers: {
-		createSnack: (_, action: PayloadAction<Partial<Omit<SnackState, "open">>>) => {
+		toast: (_, action: PayloadAction<Partial<Omit<ToastState, "open">>>) => {
 			const { content, severity, position, duration } = action.payload;
 
 			return {
@@ -35,7 +35,7 @@ const snackSlice = createSlice({
 		},
 
 		// only exists to update dependencies in useEffect. No need to use this manually
-		closeSnack: state => {
+		closeToast: state => {
 			return {
 				...state,
 				open: false,
@@ -44,5 +44,5 @@ const snackSlice = createSlice({
 	},
 });
 
-export const { createSnack, closeSnack } = snackSlice.actions;
-export default snackSlice;
+export const { toast, closeToast } = toastSlice.actions;
+export default toastSlice;
