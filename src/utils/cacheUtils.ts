@@ -181,7 +181,7 @@ export const invalidatesUnknownErrors =
 /**
  * Utility helpers for common provides/invalidates scenarios
  */
-export const cacher = {
+const cacheUtils = {
 	defaultTags,
 	providesList,
 	invalidatesList,
@@ -191,3 +191,5 @@ export const cacher = {
 	invalidatesUnauthorized,
 	invalidatesUnknownErrors,
 };
+
+export default cacheUtils;
