@@ -1,80 +1,64 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { FaFolderPlus } from "react-icons/fa";
 
 import {
     Box, Button, Editable, EditableInput, EditablePreview, Heading, HStack, Input, Tooltip
 } from "@chakra-ui/react";
 
-import { useLazyGetUserBoardsQuery } from "../../../app/services/boards";
+import { useGetUserBoardsQuery, useLazyGetUserBoardsQuery } from "../../../app/services/boards";
+import { useMoveCardMutation } from "../../../app/services/cards";
+import { useAddFolderMutation, useGetBoardFoldersQuery } from "../../../app/services/folder";
 import { setCurrentBoard } from "../../../app/slices/board";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../hooks/useAppSelector";
-import { iFolder } from "../../../utils/models";
+import { iBoard, iFolder } from "../../../utils/models";
+import { MainNav } from "../../main/ui/components/MainNav";
 import { EditCardModal } from "./components/EditCardModal";
 import { Folder } from "./components/Folder";
-import { MainDrawer } from "./components/MainDrawer";
-import { NavBar } from "./components/NavBar";
 
 
-const folders: iFolder[] = [
-	{
-		id: "folder1",
-		boardId: "board1",
-		name: "Folder 1",
-		description: "This is folder 1",
-	},
-	{
-		id: "folder2",
-		boardId: "board1",
-		name: "Folder 2",
-		description: "This is folder 2",
-	},
-];
+interface Props {
+	board: iBoard;
+}
 
-export const BoardPage: React.FC = () => {
+export const BoardPage: React.FC<Props> = props => {
 	const dispatch = useAppDispatch();
-	const [getUserBoards, { error: isErrorBoards }] = useLazyGetUserBoardsQuery();
-	const currentBoard = useAppSelector(state => state.boards.current);
-
-	useEffect(() => {
-		(async () => {
-			const boards = await getUserBoards("939264bb-6cc6-46a6-aaad-bbb3dca9fcf5").unwrap();
-			if (boards) {
-				dispatch(setCurrentBoard(boards[0]));
-			}
-		})();
-	}, []);
-
-	useEffect(() => {
-		if (!currentBoard) return;
-		document.title = `${currentBoard.name} | Flow`;
-	}, []);
+	const { board } = props;
+	const { data: folders, refetch: refetchFolders } = useGetBoardFoldersQuery(board.id);
+	const [moveCard] = useMoveCardMutation();
+	const [addFolder] = useAddFolderMutation();
 
 	const [isAddingFolder, setIsAddingFolder] = useState(false);
 
-	const handleAddFolder = (folderName: string) => {
-		if (folderName.length === 0) {
+	const handleAddFolder = async (folderName: string) => {
+		if (folderName.length <= 0) {
 			setIsAddingFolder(false);
 			return;
 		}
 
 		setIsAddingFolder(false);
-		folders.push({
-			id: "folder2",
-			boardId: "board1",
-			name: folderName,
-			description: "",
-		});
 	};
 
+	const onDragEnd = useCallback((result: DropResult) => {
+		const { destination, source, draggableId } = result;
+
+		if (!destination) return;
+		if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+		moveCard({
+			cardId: draggableId,
+			folderId: destination.droppableId,
+		}).then(() => refetchFolders());
+	}, []);
+
 	return (
-		<>
-			<NavBar />
+		<DragDropContext onDragEnd={onDragEnd}>
 			<Box p="10">
-				<Heading mb="6">Hello World!</Heading>
-				<HStack spacing="6" alignItems="start">
-					{folders.map(folder => (
-						<Folder folder={folder} key={folder.id} />
+				<Heading mb="6">{board.name}</Heading>
+				<HStack spacing="6" alignItems="start" overflowX="scroll">
+					{folders?.map(folder => (
+						<Folder key={folder.id} folder={folder} />
 					))}
 					<Box w="64" p="2" bgColor="gray.200" borderRadius={6}>
 						{isAddingFolder && (
@@ -106,8 +90,7 @@ export const BoardPage: React.FC = () => {
 					</Box>
 				</HStack>
 			</Box>
-			<MainDrawer />
 			<EditCardModal />
-		</>
+		</DragDropContext>
 	);
 };
