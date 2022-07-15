@@ -3,6 +3,11 @@ import { iCard } from "../../utils/models";
 import api, { ApiTags } from "./api";
 
 
+interface AddCardArgs {
+	folderId: string;
+	name: string;
+}
+
 const cards = api.injectEndpoints({
 	endpoints: builder => ({
 		getFolderCards: builder.query<iCard[], string>({
@@ -11,17 +16,29 @@ const cards = api.injectEndpoints({
 			}),
 		}),
 
-		addCard: builder.mutation<void, iCard>({
-			query: card => ({
+		addCard: builder.mutation<void, AddCardArgs>({
+			query: ({ folderId, name }) => ({
 				url: `/cards`,
 				method: "POST",
-				body: card,
+				body: {
+					name,
+					folderId,
+				},
 			}),
 
 			invalidatesTags: cacher.invalidatesList(ApiTags.Cards),
 		}),
 
-		moveToFolder: builder.mutation<void, { cardId: string; folderId: string }>({
+		deleteCard: builder.mutation<void, string>({
+			query: cardId => ({
+				url: `/cards/${cardId}`,
+				method: "DELETE",
+			}),
+
+			invalidatesTags: cacher.invalidatesList(ApiTags.Cards),
+		}),
+
+		moveCard: builder.mutation<void, { cardId: string; folderId: string }>({
 			query: ({ cardId, folderId }) => ({
 				url: `/cards/${cardId}/move`,
 				method: "PUT",
@@ -33,4 +50,5 @@ const cards = api.injectEndpoints({
 	}),
 });
 
-export const { useAddCardMutation, useGetFolderCardsQuery, useMoveToFolderMutation } = cards;
+export const { useAddCardMutation, useDeleteCardMutation, useGetFolderCardsQuery, useMoveCardMutation } =
+	cards;

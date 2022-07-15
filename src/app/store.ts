@@ -16,9 +16,9 @@ const uiReducer = combineReducers({
 
 const rootReducer = combineReducers({
 	[api.reducerPath]: api.reducer,
-	ui: uiReducer,
 	[boardSlice.name]: boardSlice.reducer,
 	[authSlice.name]: authSlice.reducer,
+	ui: uiReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
