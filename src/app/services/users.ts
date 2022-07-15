@@ -12,16 +12,16 @@ const users = api.injectEndpoints({
 	overrideExisting: false,
 
 	endpoints: builder => ({
-		getUser: builder.query<iUser, string>({
-			query: id => ({
-				url: `/users/${id}`,
+		getUser: builder.query<iUser, iUser["id"]>({
+			query: userId => ({
+				url: `/users/${userId}`,
 				method: "get",
 			}),
 
 			providesTags: cacheUtils.cacheByIdArg(ApiTags.Users),
 		}),
 
-		loginUser: builder.query<iUser, LoginRequestBody>({
+		loginUser: builder.query<iUser, { email: iUser["email"], password: string }>({
 			query: ({ email, password }) => ({
 				url: `/users/login`,
 				method: "post",

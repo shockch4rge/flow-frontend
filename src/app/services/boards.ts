@@ -5,16 +5,17 @@ import api, { ApiTags } from "./api";
 
 const boards = api.injectEndpoints({
 	endpoints: builder => ({
-		getUserBoards: builder.query<iBoard[], Pick<iBoard, "authorId">>({
-			query: ({ authorId: userId }) => ({
+		getUserBoards: builder.query<iBoard[], iBoard["authorId"]>({
+			query: userId => ({
 				url: `/users/${userId}/boards`,
+				method: "GET",
 			}),
 
 			providesTags: cacheUtils.providesList(ApiTags.Boards),
 		}),
 
-		getBoard: builder.query<iBoard, Pick<iBoard, "id">>({
-			query: ({ id: boardId }) => ({
+		getBoard: builder.query<iBoard, iBoard["id"]>({
+			query: boardId => ({
 				url: `/boards/${boardId}`,
 				method: "GET",
 			}),

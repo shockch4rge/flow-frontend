@@ -5,8 +5,8 @@ import api, { ApiTags } from "./api";
 
 const folders = api.injectEndpoints({
 	endpoints: builder => ({
-		getBoardFolders: builder.query<iFolder[], Pick<iFolder, "boardId">>({
-			query: ({ boardId }) => ({
+		getBoardFolders: builder.query<iFolder[], iFolder["boardId"]>({
+			query: boardId => ({
 				url: `/boards/${boardId}/folders`,
 				method: "get",
 			}),

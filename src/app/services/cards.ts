@@ -5,8 +5,8 @@ import api, { ApiTags } from "./api";
 
 const cards = api.injectEndpoints({
 	endpoints: builder => ({
-		getFolderCards: builder.query<iCard[], Pick<iCard, "folderId">>({
-			query: ({ folderId }) => ({
+		getFolderCards: builder.query<iCard[], iCard["folderId"]>({
+			query: folderId => ({
 				url: `/folders/${folderId}/cards`,
 			}),
 
@@ -26,8 +26,8 @@ const cards = api.injectEndpoints({
 			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
 		}),
 
-		deleteCard: builder.mutation<void, Pick<iCard, "id">>({
-			query: ({ id: cardId }) => ({
+		deleteCard: builder.mutation<void, iCard["id"]>({
+			query: cardId => ({
 				url: `/cards/${cardId}`,
 				method: "DELETE",
 			}),
