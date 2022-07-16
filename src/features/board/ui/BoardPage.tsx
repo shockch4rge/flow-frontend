@@ -8,7 +8,9 @@ import {
 
 import { useGetUserBoardsQuery, useLazyGetUserBoardsQuery } from "../../../app/services/boards";
 import { useMoveCardMutation } from "../../../app/services/cards";
-import { useAddFolderMutation, useGetBoardFoldersQuery } from "../../../app/services/folder";
+import {
+    useAddFolderMutation, useGetBoardFoldersQuery, useMoveFolderMutation
+} from "../../../app/services/folder";
 import { setCurrentBoard } from "../../../app/slices/board";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../hooks/useAppSelector";
@@ -25,31 +27,41 @@ interface Props {
 export const BoardPage: React.FC<Props> = props => {
 	const dispatch = useAppDispatch();
 	const { board } = props;
-	const { data: folders, refetch: refetchFolders } = useGetBoardFoldersQuery(board.id);
+	const { data: folders } = useGetBoardFoldersQuery(board.id);
 	const [moveCard] = useMoveCardMutation();
+	const [moveFolder] = useMoveFolderMutation();
 	const [addFolder] = useAddFolderMutation();
 
-	const [isAddingFolder, setIsAddingFolder] = useState(false);
+	const [isAddingFolderMode, setIsAddingFolderMode] = useState(false);
 
 	const handleAddFolder = async (folderName: string) => {
 		if (folderName.length <= 0) {
-			setIsAddingFolder(false);
+			setIsAddingFolderMode(false);
 			return;
 		}
 
-		setIsAddingFolder(false);
+		await addFolder({
+			name: folderName,
+			boardId: board.id,
+		});
+		setIsAddingFolderMode(false);
 	};
 
-	const onDragEnd = useCallback((result: DropResult) => {
-		const { destination, source, draggableId } = result;
+	const onDragEnd = useCallback(async (result: DropResult) => {
+		const { destination, source, draggableId, type } = result;
 
 		if (!destination) return;
 		if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-		moveCard({
-			cardId: draggableId,
+		if (type === "folder") {
+
+		}
+ 
+		await moveCard({
+			id: draggableId,
 			folderId: destination.droppableId,
-		}).then(() => refetchFolders());
+			index: destination.index,
+		});
 	}, []);
 
 	return (
@@ -61,7 +73,7 @@ export const BoardPage: React.FC<Props> = props => {
 						<Folder key={folder.id} folder={folder} />
 					))}
 					<Box w="64" p="2" bgColor="gray.200" borderRadius={6}>
-						{isAddingFolder && (
+						{isAddingFolderMode && (
 							<Editable
 								w="100%"
 								mb="2"
@@ -83,7 +95,7 @@ export const BoardPage: React.FC<Props> = props => {
 							leftIcon={<FaFolderPlus />}
 							textColor="gray.400"
 							fontWeight="light"
-							onClick={() => setIsAddingFolder(true)}
+							onClick={() => setIsAddingFolderMode(true)}
 						>
 							Add Folder
 						</Button>
