@@ -3,7 +3,8 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import { FaPlusSquare } from "react-icons/fa";
 
 import {
-    Box, Button, Center, Editable, EditableInput, EditablePreview, Input, Spinner, Text
+    Box, Button, Center, Editable, EditableInput, EditablePreview, Input, Spinner, Text, VStack,
+    Wrap, WrapItem
 } from "@chakra-ui/react";
 
 import { useAddCardMutation, useGetFolderCardsQuery } from "../../../../app/services/cards";
@@ -20,7 +21,7 @@ interface Props {
 export const Folder: React.FC<Props> = props => {
 	const { folder } = props;
 	const dispatch = useAppDispatch();
-	const { data: cards, isLoading: isLoadingCards } = useGetFolderCardsQuery({ folderId: folder.id });
+	const { data: cards, isLoading: isLoadingCards } = useGetFolderCardsQuery(folder.id);
 	const [addCard, { isLoading: isAddingCard }] = useAddCardMutation();
 	const [isAddingCardMode, setIsAddingCardMode] = useState(false);
 
@@ -57,16 +58,19 @@ export const Folder: React.FC<Props> = props => {
 				<Droppable droppableId={folder.id}>
 					{({ innerRef, droppableProps, placeholder }, snap) => (
 						<>
+							{/* the reason we don't use a VStack here is because chakra applies the top margin to every element,
+								even while dragging. This causes the placeholder to be offsetted by the top margin of the
+								first element. */}
 							<Box
-								ref={innerRef}
-								{...droppableProps}
 								mt="4"
 								p="2"
+								ref={innerRef}
+								{...droppableProps}
 								minH="42"
 								borderRadius="6"
-								transition="all 0.2s ease-in-out"
 								display="flex"
 								flexDirection="column"
+								transition="background-color 0.2s ease-in-out"
 								bgColor={snap.isDraggingOver ? "gray.100" : "gray.200"}
 							>
 								{cards?.map((card, index) => (
@@ -74,7 +78,7 @@ export const Folder: React.FC<Props> = props => {
 										{({ innerRef, draggableProps, dragHandleProps }) => (
 											<Box
 												w="100%"
-												mb="2"
+												mb={index < cards.length - 1 ? "2" : "0"}
 												ref={innerRef}
 												{...draggableProps}
 												{...dragHandleProps}
@@ -88,6 +92,7 @@ export const Folder: React.FC<Props> = props => {
 								{isAddingCardMode && (
 									<Editable
 										w="100%"
+										mt="3"
 										defaultValue="New card"
 										selectAllOnFocus
 										startWithEditView
