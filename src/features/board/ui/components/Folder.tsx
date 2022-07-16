@@ -3,8 +3,8 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import { FaPlusSquare } from "react-icons/fa";
 
 import {
-    Box, Button, Center, Editable, EditableInput, EditablePreview, Input, Spinner, Text, VStack,
-    Wrap, WrapItem
+    Box, Button, Center, Editable, EditableInput, EditablePreview, Input, SlideFade, Spinner, Text,
+    VStack, Wrap, WrapItem
 } from "@chakra-ui/react";
 
 import { useAddCardMutation, useGetFolderCardsQuery } from "../../../../app/services/cards";
@@ -76,15 +76,21 @@ export const Folder: React.FC<Props> = props => {
 								{cards?.map((card, index) => (
 									<Draggable key={card.id} draggableId={card.id} index={index}>
 										{({ innerRef, draggableProps, dragHandleProps }) => (
-											<Box
-												w="100%"
-												mb={index < cards.length - 1 ? "2" : "0"}
-												ref={innerRef}
-												{...draggableProps}
-												{...dragHandleProps}
+											<SlideFade
+												in={!isLoadingCards}
+												offsetY="20px"
+												delay={{ enter: index / 25, exit: 1 }}
 											>
-												<Card card={card} />
-											</Box>
+												<Box
+													w="100%"
+													mb={index < cards.length - 1 ? "2" : "0"}
+													ref={innerRef}
+													{...draggableProps}
+													{...dragHandleProps}
+												>
+													<Card card={card} />
+												</Box>
+											</SlideFade>
 										)}
 									</Draggable>
 								))}
