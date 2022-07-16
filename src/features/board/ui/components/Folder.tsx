@@ -64,6 +64,7 @@ export const Folder: React.FC<Props> = props => {
 							<Box
 								mt="4"
 								p="2"
+								pb="-2"
 								ref={innerRef}
 								{...droppableProps}
 								minH="42"
@@ -83,7 +84,7 @@ export const Folder: React.FC<Props> = props => {
 											>
 												<Box
 													w="100%"
-													mb={index < cards.length - 1 ? "2" : "0"}
+													mb="2"
 													ref={innerRef}
 													{...draggableProps}
 													{...dragHandleProps}
