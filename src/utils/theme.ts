@@ -13,7 +13,7 @@ const extendedTheme = {
 	components: {
 		Button: {
 			variants: {
-				ghost: (props: StyleFunctionProps) => ({
+				primaryGhost: (props: StyleFunctionProps) => ({
 					bg: "transparent",
 					fontWeight: "light",
 					textColor: "green.400",
@@ -26,12 +26,64 @@ const extendedTheme = {
 						// textColor: "green.700",
 					},
 				}),
+
+				primary: (props: StyleFunctionProps) => ({
+					bg: "green.300",
+					fontWeight: "light",
+					textColor: "white",
+					_hover: {
+						bg: "green.400",
+						textColor: "white",
+					},
+					_active: {
+						bg: "green.400",
+					},
+				}),
+
+				secondary: (props: StyleFunctionProps) => ({}),
+
+				secondaryGhost: (props: StyleFunctionProps) => ({
+					bg: "transparent",
+					fontWeight: "light",
+					textColor: "gray.400",
+					_hover: {
+						bg: "gray.200",
+						textColor: "gray.500",
+					},
+					_active: {
+						bg: "gray.300",
+					},
+				}),
+
+				dueDate: (props: StyleFunctionProps) => ({}),
+
+				dueDateLate: (props: StyleFunctionProps) => ({
+					bg: "red.100",
+					fontWeight: "medium",
+					textColor: "red.400",
+					_hover: {
+						bg: "red.200",
+						textColor: "red.500",
+					},
+					_active: {
+						bg: "red.300",
+					},
+				}),
+
+				sidebar: (props: StyleFunctionProps) => ({
+					bg: "#44546e",
+					fontWeight: "medium",
+					textColor: "green.300",
+					_hover: {
+						bg: "gray.500",
+					},
+				}),
 			},
 		},
 	} as ComponentStyleConfig,
 	fonts: {
-		body: "Lexend",
-		heading: "Lexend",
+		body: "Karla",
+		heading: "Karla",
 		monospace: "Menlo, monospace",
 	},
 };
