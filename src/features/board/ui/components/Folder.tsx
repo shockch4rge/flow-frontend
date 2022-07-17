@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { FaPlusSquare } from "react-icons/fa";
 
 import {
-    Box, Button, Center, Editable, EditableInput, EditablePreview, Input, SlideFade, Spinner, Text,
-    VStack, Wrap, WrapItem
+    Box, Button, Center, Editable, EditableInput, EditablePreview, Flex, Input, SlideFade, Spinner,
+    Text, VStack, Wrap, WrapItem
 } from "@chakra-ui/react";
 
 import { useAddCardMutation, useGetFolderCardsQuery } from "../../../../app/services/cards";
 import { toast } from "../../../../app/slices/ui/toast";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { iCard, iFolder } from "../../../../utils/models";
+import { StrictModeDroppable } from "../../../../utils/StrictModeDroppable";
 import { Card } from "./Card";
 
 
@@ -44,8 +45,8 @@ export const Folder: React.FC<Props> = props => {
 		);
 	};
 
-	return (
-		<Box w="72" p="2" bgColor="gray.200" borderRadius="6">
+	const memoizedFolder = useMemo(() => {
+		return <Box w="72" p="2" bgColor="gray.200" borderRadius="6">
 			<Text alignSelf="start" fontWeight="semibold" mt="2" ml="2">
 				{folder.name}
 			</Text>
@@ -55,13 +56,13 @@ export const Folder: React.FC<Props> = props => {
 					<Spinner size="xl" my="6" />
 				</Center>
 			) : (
-				<Droppable droppableId={folder.id}>
+				<StrictModeDroppable droppableId={folder.id}>
 					{({ innerRef, droppableProps, placeholder }, snap) => (
 						<>
 							{/* the reason we don't use a VStack here is because chakra applies the top margin to every element,
 								even while dragging. This causes the placeholder to be offsetted by the top margin of the
 								first element. */}
-							<Box
+							<Flex
 								mt="4"
 								p="2"
 								pb="-2"
@@ -69,10 +70,9 @@ export const Folder: React.FC<Props> = props => {
 								{...droppableProps}
 								minH="42"
 								borderRadius="6"
-								display="flex"
 								flexDirection="column"
-								transition="background-color 0.2s ease-in-out"
 								bgColor={snap.isDraggingOver ? "gray.100" : "gray.200"}
+								transition="background-color 0.2s ease-in-out"
 							>
 								{cards?.map((card, index) => (
 									<Draggable key={card.id} draggableId={card.id} index={index}>
@@ -111,7 +111,7 @@ export const Folder: React.FC<Props> = props => {
 									</Editable>
 								)}
 								{isAddingCard && <Spinner alignSelf="center" my="2" />}
-							</Box>
+							</Flex>
 							<Button
 								mt="2"
 								w="100%"
@@ -127,8 +127,10 @@ export const Folder: React.FC<Props> = props => {
 							</Button>
 						</>
 					)}
-				</Droppable>
+				</StrictModeDroppable>
 			)}
 		</Box>
-	);
+	}, [cards])
+
+	return memoizedFolder;
 };
