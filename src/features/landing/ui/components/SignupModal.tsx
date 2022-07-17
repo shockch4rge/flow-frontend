@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 
 import { closeModal, openModal } from "../../../../app/slices/ui/modals";
+import { FlowLogo } from "../../../../common-components";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
 
@@ -32,10 +33,7 @@ export const SignupModal: React.FC = () => {
 			<ModalContent>
 				<ModalHeader>
 					<Flex justify="center">
-						<HStack align="center">
-							<Image boxSize="50px" src="/src/assets/flow-logo.svg" alt="logo" />
-							<Heading>Flow</Heading>
-						</HStack>
+						<FlowLogo size={50} />
 					</Flex>
 				</ModalHeader>
 				<ModalCloseButton />

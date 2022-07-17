@@ -7,6 +7,7 @@ import {
 
 import { openDrawer } from "../../../../app/slices/ui/drawers";
 import { openModal } from "../../../../app/slices/ui/modals";
+import { FlowLogo } from "../../../../common-components";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 
 
@@ -25,10 +26,7 @@ export const LandingNavBar: React.FC = () => {
 			backdropFilter="auto"
 			direction="row"
 		>
-			<HStack>
-				<Image boxSize="50px" src="/src/assets/flow-logo.svg" alt="Flow logo" userSelect="none" />
-				<Heading userSelect="none">Flow</Heading>
-			</HStack>
+			<FlowLogo size={50} />
 			<Spacer />
 			<Hide below="md">
 				<HStack>
