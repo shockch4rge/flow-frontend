@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { DragDropContext, DropResult } from "react-beautiful-dnd";
-import { FaFolderPlus } from "react-icons/fa";
+import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
+import { FaBox, FaFolderPlus } from "react-icons/fa";
 
 import {
-    Box, Button, Editable, EditableInput, EditablePreview, Heading, HStack, Input, Tooltip
+    Box, Button, Editable, EditableInput, EditablePreview, Flex, Heading, HStack, Input, Tooltip
 } from "@chakra-ui/react";
 
 import { useGetUserBoardsQuery, useLazyGetUserBoardsQuery } from "../../../app/services/boards";
@@ -15,6 +15,7 @@ import { setCurrentBoard } from "../../../app/slices/board";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../hooks/useAppSelector";
 import { iBoard, iFolder } from "../../../utils/models";
+import { StrictModeDroppable } from "../../../utils/StrictModeDroppable";
 import { MainNav } from "../../main/ui/components/MainNav";
 import { EditCardModal } from "./components/EditCardModal";
 import { Folder } from "./components/Folder";
@@ -54,9 +55,10 @@ export const BoardPage: React.FC<Props> = props => {
 		if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
 		if (type === "folder") {
-
+			console.log("moving folder");
+			return;
 		}
- 
+
 		await moveCard({
 			id: draggableId,
 			folderId: destination.droppableId,
@@ -68,39 +70,69 @@ export const BoardPage: React.FC<Props> = props => {
 		<DragDropContext onDragEnd={onDragEnd}>
 			<Box p="10">
 				<Heading mb="6">{board.name}</Heading>
-				<HStack spacing="6" alignItems="start" overflowX="scroll">
-					{folders?.map(folder => (
-						<Folder key={folder.id} folder={folder} />
-					))}
-					<Box w="64" p="2" bgColor="gray.200" borderRadius={6}>
-						{isAddingFolderMode && (
-							<Editable
-								w="100%"
-								mb="2"
-								defaultValue="New folder"
-								isPreviewFocusable
-								selectAllOnFocus
-								startWithEditView
-								onSubmit={handleAddFolder}
+				<StrictModeDroppable droppableId={board.id} direction="horizontal" type="folder">
+					{({ droppableProps, innerRef, placeholder }, snap) => (
+						<HStack align="start" borderRadius="8">
+							<Flex
+								ref={innerRef}
+								p="4"
+								pr="-4"
+								borderRadius="8"
+								alignItems="start"
+								direction="row"
+								bgColor={snap.isDraggingOver ? "gray.50" : "transparent"}
+								transition="background-color 0.2s ease-in-out"
+								{...droppableProps}
 							>
-								<EditablePreview w="100%" py={2} px={2} bg="gray.50" />
-								<Input py={2} px={4} as={EditableInput} />
-							</Editable>
-						)}
-						<Button
-							w="100%"
-							bg="transparent"
-							_hover={{ bgColor: "gray.100" }}
-							_active={{ bgColor: "gray.50" }}
-							leftIcon={<FaFolderPlus />}
-							textColor="gray.400"
-							fontWeight="light"
-							onClick={() => setIsAddingFolderMode(true)}
-						>
-							Add Folder
-						</Button>
-					</Box>
-				</HStack>
+								{folders?.map((folder, index) => (
+									<Draggable key={folder.id} draggableId={folder.id} index={index}>
+										{({ innerRef, draggableProps, dragHandleProps }, snap) => (
+											<Box
+												ref={innerRef}
+												{...draggableProps}
+												{...dragHandleProps}
+												mr="6"
+											>
+												<Folder folder={folder} />
+											</Box>
+										)}
+									</Draggable>
+								))}
+								{placeholder}
+							</Flex>
+							<Box pt="4">
+								<Box w="64" p="2" bgColor="gray.200" borderRadius={6}>
+									{isAddingFolderMode && (
+										<Editable
+											w="100%"
+											mb="2"
+											defaultValue="New folder"
+											isPreviewFocusable
+											selectAllOnFocus
+											startWithEditView
+											onSubmit={handleAddFolder}
+										>
+											<EditablePreview w="100%" py={2} px={2} bg="gray.50" />
+											<Input py={2} px={4} as={EditableInput} />
+										</Editable>
+									)}
+									<Button
+										w="100%"
+										bg="transparent"
+										_hover={{ bgColor: "gray.100" }}
+										_active={{ bgColor: "gray.50" }}
+										leftIcon={<FaFolderPlus />}
+										textColor="gray.400"
+										fontWeight="light"
+										onClick={() => setIsAddingFolderMode(true)}
+									>
+										Add Folder
+									</Button>
+								</Box>
+							</Box>
+						</HStack>
+					)}
+				</StrictModeDroppable>
 			</Box>
 			<EditCardModal />
 		</DragDropContext>
