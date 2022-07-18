@@ -1,17 +1,14 @@
 import { useEffect } from "react";
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
-import { Box } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 
 import { useGetUserBoardsQuery } from "../../../app/services/boards";
 import { setCurrentBoard } from "../../../app/slices/board";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../hooks/useAppSelector";
 import { MOCK_USER_ID } from "../../../utils/mockData";
-import { BoardPage } from "../../board/ui/BoardPage";
-import { SettingsPage } from "../../settings/SettingsPage";
-import { MainDrawer } from "./components/MainDrawer";
-import { MainNav } from "./components/MainNav";
+import { MainSidebar } from "./components/MainSidebar";
 
 
 export const MainView: React.FC = () => {
@@ -25,10 +22,12 @@ export const MainView: React.FC = () => {
 	}, [boards]);
 
 	return (
-		<Box>
-			<MainNav />
-			<MainDrawer />
-			<Outlet />
+		<Box overflowX="clip">
+			{/* <MainNav /> */}
+			<HStack h="100vh" overflow="hidden">
+				<MainSidebar />
+				<Outlet />
+			</HStack>
 		</Box>
 	);
 };
