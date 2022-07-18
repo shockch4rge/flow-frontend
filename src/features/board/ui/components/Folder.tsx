@@ -71,10 +71,16 @@ export const Folder: React.FC<Props> = props => {
 									ref={innerRef}
 									{...droppableProps}
 									minH="42"
+									maxH="md"
 									borderRadius="6"
 									flexDirection="column"
 									bgColor={snap.isDraggingOver ? "gray.100" : "gray.200"}
 									transition="background-color 0.2s ease-in-out"
+									overflowY="auto"
+									overflowX="hidden"
+									sx={{
+										scrollbarGutter: "auto",
+									}}
 								>
 									{cards?.map((card, index) => (
 										<Draggable key={card.id} draggableId={card.id} index={index}>
