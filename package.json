@@ -8,11 +8,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.2.1",
-    "@chakra-ui/theme-tools": "^2.0.2",
+    "@chakra-ui/react": "^2.2.4",
+    "@chakra-ui/theme-tools": "^2.0.5",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
-    "@reduxjs/toolkit": "^1.8.1",
+    "@reduxjs/toolkit": "^1.8.3",
     "@types/react-beautiful-dnd": "^13.1.2",
     "dotenv": "^16.0.0",
     "formik": "^2.2.9",
