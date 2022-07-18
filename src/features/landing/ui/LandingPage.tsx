@@ -1,6 +1,8 @@
 import { FaArrowRight } from "react-icons/fa";
 
-import { Button, Flex, Heading, HStack, Image, Stack, VStack } from "@chakra-ui/react";
+import {
+    Button, Flex, Heading, Highlight, HStack, Image, Stack, Text, VStack
+} from "@chakra-ui/react";
 
 import { openModal } from "../../../app/slices/ui/modals";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
@@ -24,9 +26,24 @@ export const LandingPage: React.FC = () => {
 							<Heading
 								size={["3xl", "3xl", "2xl", "2xl"]}
 								textAlign={["center", "center", "unset", "unset"]}
+								fontWeight="black"
 							>
-								Embrace productivity.
+								<Highlight query="Embrace" styles={{ textColor: "green.300" }}>
+									Embrace productivity.
+								</Highlight>
 							</Heading>
+							<Text
+								fontSize={["lg", "lg", "xl"]}
+								textAlign={["center", "center", "start", "start"]}
+							>
+								Flow is a{" "}
+								<Highlight
+									query={["simple,", "powerful"]}
+									styles={{ p: "1", borderRadius: "4", bgColor: "green.100" }}
+								>
+									simple, yet powerful tool to manage your daily tasks and workflows.
+								</Highlight>
+							</Text>
 							<Button
 								w="48"
 								variant="primaryGhost"
