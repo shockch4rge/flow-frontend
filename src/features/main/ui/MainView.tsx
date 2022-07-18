@@ -24,7 +24,7 @@ export const MainView: React.FC = () => {
 	return (
 		<Box overflowX="clip">
 			{/* <MainNav /> */}
-			<HStack h="100vh" overflow="hidden">
+			<HStack h="100vh" overflow="hidden" spacing="0">
 				<MainSidebar />
 				<Outlet />
 			</HStack>
