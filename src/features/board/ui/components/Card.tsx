@@ -50,7 +50,7 @@ export const Card: React.FC<Props> = props => {
 				<DueDateButton />
 			</Box>
 		),
-		[card]
+		[card, isHovered]
 	);
 
 	return memoizedCard;
