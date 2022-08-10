@@ -1,6 +1,5 @@
 export const AppRoutes = {
-	Home: "/",
+	Landing: "/",
 	Settings: "/home/settings",
 	Board: "/home/board",
-	Landing: "/home/landing",
 };
