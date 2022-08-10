@@ -2,7 +2,6 @@ import cacheUtils from "../../utils/cacheUtils";
 import { iFolder } from "../../utils/models";
 import api, { ApiTags } from "./api";
 
-
 const folders = api.injectEndpoints({
 	endpoints: builder => ({
 		getBoardFolders: builder.query<iFolder[], iFolder["boardId"]>({
@@ -26,7 +25,33 @@ const folders = api.injectEndpoints({
 
 			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Folders),
 		}),
+
+		moveFolder: builder.mutation<void, Pick<iFolder, "id"> & { index: number }>({
+			query: ({ id, index }) => ({
+				url: `/folders/${id}/move`,
+				method: "PUT",
+				body: {
+					index,
+				},
+			}),
+
+			onQueryStarted: async ({ id, index }, { dispatch, queryFulfilled }) => {
+				const patchResult = dispatch(
+					folders.util.updateQueryData("getBoardFolders", id, folders => {
+						console.log(folders.find(folder => folder.id === id));
+
+						Object.assign(folders.find(folder => folder.id === id)!, index);
+					})
+				);
+
+				try {
+					await queryFulfilled;
+				} catch (e) {
+					patchResult.undo();
+				}
+			},
+		}),
 	}),
 });
 
-export const { useGetBoardFoldersQuery, useAddFolderMutation } = folders;
+export const { useGetBoardFoldersQuery, useAddFolderMutation, useMoveFolderMutation } = folders;
