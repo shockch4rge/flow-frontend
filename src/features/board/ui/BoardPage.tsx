@@ -3,14 +3,25 @@ import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautif
 import { FaBox, FaFolderPlus } from "react-icons/fa";
 
 import {
-    Box, Button, Editable, EditableInput, EditablePreview, Flex, Heading, HStack, Input, Tooltip,
-    VStack
+	Box,
+	Button,
+	Editable,
+	EditableInput,
+	EditablePreview,
+	Flex,
+	Heading,
+	HStack,
+	Input,
+	Tooltip,
+	VStack,
 } from "@chakra-ui/react";
 
 import { useGetUserBoardsQuery, useLazyGetUserBoardsQuery } from "../../../app/services/boards";
 import { useMoveCardMutation } from "../../../app/services/cards";
 import {
-    useAddFolderMutation, useGetBoardFoldersQuery, useMoveFolderMutation
+	useAddFolderMutation,
+	useGetBoardFoldersQuery,
+	useMoveFolderMutation,
 } from "../../../app/services/folder";
 import { setCurrentBoard } from "../../../app/slices/board";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
@@ -19,7 +30,6 @@ import { iBoard, iFolder } from "../../../utils/models";
 import { StrictModeDroppable } from "../../../utils/StrictModeDroppable";
 import { EditCardModal } from "./components/EditCardModal";
 import { Folder } from "./components/Folder";
-
 
 interface Props {
 	board: iBoard;
@@ -52,7 +62,8 @@ export const BoardPage: React.FC<Props> = props => {
 		const { destination, source, draggableId, type } = result;
 
 		if (!destination) return;
-		if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+		if (destination.droppableId === source.droppableId && destination.index === source.index)
+			return;
 
 		if (type === "folder") {
 			console.log("moving folder");
@@ -68,7 +79,15 @@ export const BoardPage: React.FC<Props> = props => {
 
 	return (
 		<DragDropContext onDragEnd={onDragEnd}>
-			<VStack align="start" w="full" h="full" p="8" spacing="6" overflowX="scroll" overflowY="hidden">
+			<VStack
+				align="start"
+				w="full"
+				h="full"
+				p="8"
+				spacing="6"
+				overflowY="hidden"
+				bgColor="white"
+			>
 				<Heading ml="4">{board.name}</Heading>
 				<StrictModeDroppable droppableId={board.id} direction="horizontal" type="folder">
 					{({ droppableProps, innerRef, placeholder }, snap) => (
@@ -85,7 +104,11 @@ export const BoardPage: React.FC<Props> = props => {
 								{...droppableProps}
 							>
 								{folders?.map((folder, index) => (
-									<Draggable key={folder.id} draggableId={folder.id} index={index}>
+									<Draggable
+										key={folder.id}
+										draggableId={folder.id}
+										index={index}
+									>
 										{({ innerRef, draggableProps, dragHandleProps }, snap) => (
 											<Box
 												ref={innerRef}
@@ -93,7 +116,12 @@ export const BoardPage: React.FC<Props> = props => {
 												{...dragHandleProps}
 												mr="6"
 											>
-												<Folder folder={folder} />
+												<Folder
+													folder={folder}
+													toggleSelection={cardId => {}}
+													toggleSelectionInGroup={cardId => {}}
+													multiSelectTo={newCardId => {}}
+												/>
 											</Box>
 										)}
 									</Draggable>
