@@ -8,10 +8,10 @@ import { Box, Center, Heading, Spinner, Text, VStack, Wrap } from "@chakra-ui/re
 import { useGetUserBoardsQuery, useLazyGetUserBoardsQuery } from "./app/services/boards";
 import { setCurrentBoard } from "./app/slices/board";
 import { Toast } from "./common-components/Toast";
-import { BoardPage } from "./features/board/ui/BoardPage";
-import { LandingPage } from "./features/landing/ui/LandingPage";
-import { MainView } from "./features/main/ui/MainView";
-import { SettingsPage } from "./features/settings/ui/SettingsPage";
+import { BoardPage } from "./layouts/board/ui/BoardPage";
+import { LandingPage } from "./layouts/landing/ui/LandingPage";
+import { MainView } from "./layouts/main/ui/MainView";
+import { SettingsPage } from "./layouts/settings/ui/SettingsPage";
 import { useAppDispatch } from "./hooks/useAppDispatch";
 import { useAppSelector } from "./hooks/useAppSelector";
 import { MOCK_USER_ID } from "./utils/mockData";
