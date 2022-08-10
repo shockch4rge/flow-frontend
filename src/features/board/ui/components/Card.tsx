@@ -7,7 +7,6 @@ import { Box, Button, Text } from "@chakra-ui/react";
 import { openModal, setEditCardTarget } from "../../../../app/slices/ui/modals";
 import { iCard } from "../../../../utils/models";
 
-
 interface Props {
 	card: iCard;
 }

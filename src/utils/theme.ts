@@ -1,8 +1,17 @@
 import {
-    ComponentStyleConfig, extendTheme, theme as baseTheme, ThemeConfig, ThemeTypings
+	ComponentStyleConfig,
+	extendTheme,
+	theme as baseTheme,
+	ThemeConfig,
+	ThemeTypings,
+	withDefaultColorScheme,
 } from "@chakra-ui/react";
 import { StyleFunctionProps } from "@chakra-ui/theme-tools";
 
+const config: ThemeConfig = {
+	useSystemColorMode: false,
+	initialColorMode: "light",
+};
 
 const extendedTheme = {
 	colors: {
@@ -88,6 +97,6 @@ const extendedTheme = {
 	},
 };
 
-const theme = extendTheme(extendedTheme, baseTheme);
+const theme = extendTheme(extendedTheme, config);
 
 export default theme;

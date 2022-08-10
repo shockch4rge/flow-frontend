@@ -39,7 +39,12 @@ export const LandingPage: React.FC = () => {
 								Flow is a{" "}
 								<Highlight
 									query={["simple,", "powerful"]}
-									styles={{ p: "1", borderRadius: "4", bgColor: "green.100" }}
+									styles={{
+										p: "1",
+										borderRadius: "4",
+										bgColor: "green.100",
+										fontWeight: "bold",
+									}}
 								>
 									simple, yet powerful tool to manage your daily tasks and workflows.
 								</Highlight>
