@@ -22,10 +22,9 @@ export const MainView: React.FC = () => {
 	}, [boards]);
 
 	return (
-		<Box overflowX="clip">
-			{/* <MainNav /> */}
+		<Box>
 			<HStack h="100vh" overflow="hidden" spacing="0">
-				<MainSidebar />
+				<MainSidebar boards={boards}/>
 				<Outlet />
 			</HStack>
 		</Box>
