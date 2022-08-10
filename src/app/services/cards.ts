@@ -35,11 +35,14 @@ const cards = api.injectEndpoints({
 			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
 		}),
 
-		moveCard: builder.mutation<void, Pick<iCard, "id" | "folderId">>({
-			query: ({ id: cardId, folderId }) => ({
+		moveCard: builder.mutation<void, Pick<iCard, "id" | "folderId"> & { index: number }>({
+			query: ({ id: cardId, folderId, index }) => ({
 				url: `/cards/${cardId}/move`,
 				method: "PUT",
-				body: { folderId },
+				body: {
+					folderId,
+					index,
+				},
 			}),
 
 			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
