@@ -18,55 +18,13 @@ import { MOCK_USER_ID } from "./utils/mockData";
 
 const App: React.FC = () => {
 	const dispatch = useAppDispatch();
-	const [pollingInterval, setPollingInterval] = useState(0);
-	const currentBoard = useAppSelector(state => state.boards.current);
-	const {
-		data: boards,
-		isLoading: isLoadingBoards,
-		isSuccess: hasFetchedBoards,
-	} = useGetUserBoardsQuery(MOCK_USER_ID);
-
-	useEffect(() => {
-		if (!isLoadingBoards || hasFetchedBoards) return;
-		setTimeout(() => setPollingInterval(v => v + 10000), 10000);
-	}, [isLoadingBoards, hasFetchedBoards]);
-
-	useEffect(() => {
-		if (!boards) return;
-		dispatch(setCurrentBoard(boards[+localStorage.getItem("lastEditedBoard")! ?? 0]));
-	}, [boards]);
-
-	useEffect(() => {
-		if (!currentBoard) return;
-		document.title = `${currentBoard.name} | Flow`;
-	}, [currentBoard]);
 
 	return (
 		<>
 			<Routes>
 				<Route path="/" element={<LandingPage />} />
 				<Route path="/home" element={<MainView />}>
-					<Route
-						path="board"
-						element={
-							currentBoard ? (
-								<BoardPage board={currentBoard} />
-							) : (
-								<Center w="full">
-									<VStack>
-										<Spinner />
-										<Heading>Loading your boards...</Heading>
-										{pollingInterval > 0 && (
-											<Text>
-												We're having trouble at the moment. Refetching in{" "}
-												{pollingInterval / 1000} seconds.
-											</Text>
-										)}
-									</VStack>
-								</Center>
-							)
-						}
-					/>
+					<Route path="board" element={<BoardPage />} />
 					<Route path="settings" element={<SettingsPage />} />
 				</Route>
 			</Routes>
