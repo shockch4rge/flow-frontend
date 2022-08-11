@@ -46,9 +46,9 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 
 	return (
 		<Box
-			alignSelf="stretch"
-			minW={isSidebarOpen ? "72" : "6.5rem"}
 			w={isSidebarOpen ? "72" : "6.5rem"}
+			minW={isSidebarOpen ? "72" : "6.5rem"}
+			alignSelf="stretch"
 			bgColor="gray.700"
 			overflowX="hidden"
 			transition="0.4s ease-in-out"
@@ -63,7 +63,7 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 						overflowWrap="break-word"
 						overflow="hidden"
 					>
-						<FlowLogo size={36} variant="full" color="light" />
+						<FlowLogo size={38} variant="full" color="light" />
 					</Flex>
 
 					<IconButton
@@ -96,7 +96,7 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 				</Flex>
 
 				<VStack mt={4} spacing="2">
-					{boards && boards.length > 0 && (
+					{boards && (
 						<Accordion w="full" allowToggle index={accordionIndex}>
 							<AccordionItem borderRadius="lg" borderWidth="0px" borderBlockEnd="0px">
 								<h2>
@@ -185,7 +185,7 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 									);
 								})}
 								<AccordionPanel
-									pt="4"
+									pt="5"
 									bgColor="gray.700"
 									_hover={{ bgColor: "gray.600" }}
 									cursor="pointer"
