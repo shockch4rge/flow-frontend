@@ -5,6 +5,7 @@ import { FaBox, FaFolderPlus } from "react-icons/fa";
 import {
 	Box,
 	Button,
+	Center,
 	Editable,
 	EditableInput,
 	EditablePreview,
@@ -12,51 +13,65 @@ import {
 	Heading,
 	HStack,
 	Input,
+	Spinner,
+	Text,
 	Tooltip,
 	VStack,
 } from "@chakra-ui/react";
 
-import { useGetUserBoardsQuery, useLazyGetUserBoardsQuery } from "../../../app/services/boards";
 import { useMoveCardMutation } from "../../../app/services/cards";
 import {
 	useAddFolderMutation,
 	useGetBoardFoldersQuery,
 	useMoveFolderMutation,
 } from "../../../app/services/folder";
-import { setCurrentBoard } from "../../../app/slices/board";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
-import { useAppSelector } from "../../../hooks/useAppSelector";
-import { iBoard, iFolder } from "../../../utils/models";
 import { StrictModeDroppable } from "../../../utils/StrictModeDroppable";
 import { EditCardModal } from "./components/EditCardModal";
 import { Folder } from "./components/Folder";
+import { useBoards } from "../../main/ui/MainView";
+import { useAppSelector } from "../../../hooks/useAppSelector";
 
-interface Props {
-	board: iBoard;
-}
+const LoadingBoardsIndicator: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
+	const [pollingInterval, setPollingInterval] = useState(0);
 
-export const BoardPage: React.FC<Props> = props => {
+	useEffect(() => {
+		if (!isLoading) return;
+		setTimeout(() => setPollingInterval(v => v + 10000), 10000);
+	}, [isLoading]);
+
+	return (
+		<Center w="full">
+			<VStack>
+				<Spinner />
+				<Heading>Loading your boards...</Heading>
+				{pollingInterval > 0 && (
+					<Text>
+						We're having trouble at the moment. Refetching in {pollingInterval / 1000}{" "}
+						seconds.
+					</Text>
+				)}
+			</VStack>
+		</Center>
+	);
+};
+
+const CreateNewBoardPage: React.FC<{}> = () => {
+	return (
+		<Center>
+			<Heading>Create a new board</Heading>
+		</Center>
+	);
+};
+
+export const BoardPage: React.FC<{}> = props => {
 	const dispatch = useAppDispatch();
-	const { board } = props;
-	const { data: folders } = useGetBoardFoldersQuery(board.id);
+	const { currentBoard, isLoadingBoards } = useBoards();
+	const [isAddingFolderMode, setIsAddingFolderMode] = useState(false);
+	const { data: folders } = useGetBoardFoldersQuery(currentBoard.id);
 	const [moveCard] = useMoveCardMutation();
 	const [moveFolder] = useMoveFolderMutation();
 	const [addFolder] = useAddFolderMutation();
-
-	const [isAddingFolderMode, setIsAddingFolderMode] = useState(false);
-
-	const handleAddFolder = async (folderName: string) => {
-		if (folderName.length <= 0) {
-			setIsAddingFolderMode(false);
-			return;
-		}
-
-		await addFolder({
-			name: folderName,
-			boardId: board.id,
-		});
-		setIsAddingFolderMode(false);
-	};
 
 	const onDragEnd = useCallback(async (result: DropResult) => {
 		const { destination, source, draggableId, type } = result;
@@ -77,6 +92,21 @@ export const BoardPage: React.FC<Props> = props => {
 		});
 	}, []);
 
+	const handleAddFolder = async (folderName: string) => {
+		if (folderName.length <= 0) {
+			setIsAddingFolderMode(false);
+			return;
+		}
+
+		setIsAddingFolderMode(false);
+		await addFolder({
+			name: folderName,
+			boardId: currentBoard.id,
+		});
+	};
+
+	if (isLoadingBoards) return <LoadingBoardsIndicator isLoading={isLoadingBoards} />;
+
 	return (
 		<DragDropContext onDragEnd={onDragEnd}>
 			<VStack
@@ -88,8 +118,12 @@ export const BoardPage: React.FC<Props> = props => {
 				overflowY="hidden"
 				bgColor="white"
 			>
-				<Heading ml="4">{board.name}</Heading>
-				<StrictModeDroppable droppableId={board.id} direction="horizontal" type="folder">
+				<Heading ml="4">{currentBoard.name}</Heading>
+				<StrictModeDroppable
+					droppableId={currentBoard.id}
+					direction="horizontal"
+					type="folder"
+				>
 					{({ droppableProps, innerRef, placeholder }, snap) => (
 						<HStack align="start" borderRadius="8">
 							<Flex
