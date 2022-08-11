@@ -1,59 +1,72 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { iCard } from "../../../utils/models";
+import { iCard, iFolder } from "../../../utils/models";
 
+interface BaseModalState {
+	open: boolean;
+}
 
-interface EditCardModalState {
+interface EditCardModalState extends BaseModalState {
 	target?: iCard;
 }
 
-interface UserLoginModalState {}
+interface EditFolderModalState extends BaseModalState {
+	target?: iFolder;
+}
 
-interface UserSignUpModalState {}
+interface AddBoardModalState extends BaseModalState {}
 
-interface ResetPasswordModalState {}
+interface UserLoginModalState extends BaseModalState {}
 
-type ModalState = EditCardModalState &
-	UserLoginModalState &
-	UserSignUpModalState &
-	ResetPasswordModalState & {
-		open: boolean;
-	};
+interface UserSignUpModalState extends BaseModalState {}
 
-type ModalTypes = "editCard" | "login" | "signup" | "resetPassword";
+interface ResetPasswordModalState extends BaseModalState {}
 
-const initialState: Record<ModalTypes, ModalState> = {
+type ModalTypes = "editCard" | "editFolder" | "addBoard" | "login" | "signup" | "resetPassword";
+
+const initialState = {
 	editCard: {
 		open: false,
-	},
+	} as EditCardModalState,
 	login: {
 		open: false,
-	},
+	} as UserLoginModalState,
 	signup: {
 		open: false,
-	},
+	} as UserSignUpModalState,
 	resetPassword: {
 		open: false,
-	},
+	} as ResetPasswordModalState,
+	editFolder: {
+		open: false,
+	} as EditFolderModalState,
+	addBoard: {
+		open: false,
+	} as AddBoardModalState,
 };
 
 const modalSlice = createSlice({
 	name: "modals",
 	initialState,
 	reducers: {
-		openModal: (state, action: PayloadAction<ModalTypes>) => {
+		// TODO: why can't ts infer initialState types???
+		openModal: (state: any, action: PayloadAction<ModalTypes>) => {
 			state[action.payload].open = true;
 		},
 
-		closeModal: (state, action: PayloadAction<ModalTypes>) => {
+		closeModal: (state: any, action: PayloadAction<ModalTypes>) => {
 			state[action.payload].open = false;
 		},
 
-		setEditCardTarget: (state, action: PayloadAction<iCard>) => {
+		setEditCardTarget: (state: any, action: PayloadAction<iCard>) => {
 			state.editCard.target = action.payload;
+		},
+
+		setEditFolderTarget: (state: any, action: PayloadAction<iFolder>) => {
+			state.editFolder.target = action.payload;
 		},
 	},
 });
 
-export const { openModal, closeModal, setEditCardTarget } = modalSlice.actions;
+export const { openModal, closeModal, setEditCardTarget, setEditFolderTarget } = modalSlice.actions;
 export default modalSlice;
