@@ -81,7 +81,8 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 						color="white"
 						bg="whiteAlpha.200"
 						borderRadius="lg"
-						_hover={{ bg: "teal.200", color: "black" }}
+						_hover={{ bg: "green.300", textColor: "black" }}
+						_active={{ bg: "green.300", textColor: "black" }}
 						onClick={() => {
 							if (isSidebarOpen) {
 								closeAccordion();
@@ -211,16 +212,18 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 								: "whiteAlpha.200"
 						}
 						textColor={location.pathname === AppRoutes.Settings ? "black" : "white"}
-						_hover={{ bgColor: "green.200", textColor: "black" }}
+						_hover={{ bg: "green.300", textColor: "black" }}
+						_active={{ bg: "green.300", textColor: "black" }}
 						fontSize="lg"
 						onClick={() => navigate(AppRoutes.Settings)}
 						overflowWrap="break-word"
 						overflow="hidden"
 					>
-						<Box mr="4">
-							<FaCog size="24" />
-						</Box>
-						<Text opacity={isSidebarOpen ? "100%" : "0%"} transition="0.2s ease-in">
+						<Icon mr="5" boxSize="1.4rem" as={FaCog} />
+						<Text
+							opacity={isSidebarOpen ? "100%" : "0%"}
+							transition="opacity 0.2s ease-in"
+						>
 							Settings
 						</Text>
 					</Button>
