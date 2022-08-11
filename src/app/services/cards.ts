@@ -1,6 +1,7 @@
 import cacheUtils from "../../utils/cacheUtils";
 import { iCard } from "../../utils/models";
 import api, { ApiTags } from "./api";
+import { v4 as uuid } from "uuid";
 
 const cards = api.injectEndpoints({
 	endpoints: builder => ({
@@ -25,13 +26,12 @@ const cards = api.injectEndpoints({
 			onQueryStarted: async ({ folderId, name }, { dispatch, queryFulfilled }) => {
 				const patchResult = dispatch(
 					cards.util.updateQueryData("getFolderCards", folderId, cards => {
-						console.log("HELKDJWODJWODWIWJ");
 						cards.push({
 							components: [],
 							description: "",
 							folderId,
 							name,
-							id: "",
+							id: uuid(),
 						});
 					})
 				);
@@ -104,8 +104,6 @@ const cards = api.injectEndpoints({
 				const patchResult = dispatch(
 					cards.util.updateQueryData("getFolderCards", folderId, cards => {
 						const card = cards.find(card => card.id === id);
-
-						console.log(card);
 
 						if (!card) return;
 						Object.assign(card, {

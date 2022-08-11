@@ -1,6 +1,7 @@
 import cacheUtils from "../../utils/cacheUtils";
 import { iFolder } from "../../utils/models";
 import api, { ApiTags } from "./api";
+import { v4 as uuid } from "uuid";
 
 const folders = api.injectEndpoints({
 	endpoints: builder => ({
@@ -22,6 +23,25 @@ const folders = api.injectEndpoints({
 					boardId,
 				},
 			}),
+
+			onQueryStarted: async ({ name, boardId }, { dispatch, queryFulfilled }) => {
+				const patchResult = dispatch(
+					folders.util.updateQueryData("getBoardFolders", boardId, folders => {
+						folders.push({
+							name,
+							boardId,
+							description: "",
+							id: uuid(),
+						});
+					})
+				);
+
+				try {
+					await queryFulfilled;
+				} catch (e) {
+					patchResult.undo();
+				}
+			},
 
 			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Folders),
 		}),
