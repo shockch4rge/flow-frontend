@@ -4,13 +4,12 @@ import {
 	AccordionIcon,
 	AccordionItem,
 	AccordionPanel,
-	Avatar,
 	Box,
 	Button,
+	Divider,
 	Flex,
 	Icon,
 	IconButton,
-	Image,
 	Text,
 	useDisclosure,
 	VStack,
@@ -24,6 +23,7 @@ import { useState } from "react";
 import { setCurrentBoard } from "../../../../app/slices/board";
 import { AppRoutes } from "../../../../utils/routes";
 import { FlowLogo } from "../../../../common-components";
+import { openModal } from "../../../../app/slices/ui/modals";
 
 interface Props {
 	boards?: iBoard[];
@@ -33,12 +33,7 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const {
-		isOpen: isSidebarOpen,
-		onClose: closeSidebar,
-		onOpen: openSidebar,
-		onToggle,
-	} = useDisclosure();
+	const { isOpen: isSidebarOpen, onClose: closeSidebar, onOpen: openSidebar } = useDisclosure();
 	const [accordionIndex, setAccordionIndex] = useState(-1);
 
 	const closeAccordion = () => {
@@ -52,10 +47,11 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 	return (
 		<Box
 			alignSelf="stretch"
-			transition="0.4s ease-in-out"
+			minW={isSidebarOpen ? "72" : "6.5rem"}
 			w={isSidebarOpen ? "72" : "6.5rem"}
 			bgColor="gray.700"
 			overflowX="hidden"
+			transition="0.4s ease-in-out"
 		>
 			<Box pos="sticky" mx="6">
 				<Flex h="20" alignItems="center" justifyContent="space-between" position="relative">
@@ -106,7 +102,6 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 									<AccordionButton
 										py="3"
 										borderRadius="6"
-										transition="all 0.2s ease-in"
 										overflow="hidden"
 										fontWeight="bold"
 										_hover={
@@ -124,6 +119,7 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 												? "green.300"
 												: "whiteAlpha.200"
 										}
+										transition="0.2s ease-in"
 										onClick={() => {
 											if (isSidebarOpen && accordionIndex === -1) {
 												openAccordion(0);
@@ -151,33 +147,54 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 											<Box mr="5">
 												<FaTrello size="24" />
 											</Box>
-											<Text>Boards</Text>
+											<Text
+												opacity={isSidebarOpen ? "100%" : "0%"}
+												transition="opacity 0.2s ease-in"
+											>
+												Boards
+											</Text>
 										</Flex>
 										<AccordionIcon />
 									</AccordionButton>
 								</h2>
 								{boards?.map((board, index) => {
 									return (
-										<AccordionPanel
-											key={board.id}
-											bgColor="gray.700"
-											_hover={{ bgColor: "gray.600" }}
-											transition="0.1s ease-in"
-											cursor="pointer"
-											textColor="gray.200"
-											onClick={() => {
-												dispatch(setCurrentBoard(board));
-												localStorage.setItem(
-													"lastEditedBoard",
-													index.toString()
-												);
-												navigate(AppRoutes.Board);
-											}}
-										>
-											{board.name}
-										</AccordionPanel>
+										<>
+											<AccordionPanel
+												pt="4"
+												key={board.id}
+												bgColor="gray.700"
+												_hover={{ bgColor: "gray.600" }}
+												transition="0.1s ease-in"
+												cursor="pointer"
+												textColor="gray.200"
+												onClick={() => {
+													dispatch(setCurrentBoard(board));
+													localStorage.setItem(
+														"lastEditedBoard",
+														index.toString()
+													);
+													navigate(AppRoutes.Board);
+												}}
+											>
+												{board.name}
+												<Divider />
+											</AccordionPanel>
+										</>
 									);
 								})}
+								<AccordionPanel
+									pt="4"
+									bgColor="gray.700"
+									_hover={{ bgColor: "gray.600" }}
+									cursor="pointer"
+									textColor="green.200"
+									fontWeight="semibold"
+									onClick={() => dispatch(openModal("addBoard"))}
+									transition="0.1s ease-in"
+								>
+									Create new board
+								</AccordionPanel>
 							</AccordionItem>
 						</Accordion>
 					)}
@@ -194,7 +211,7 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 								: "whiteAlpha.200"
 						}
 						textColor={location.pathname === AppRoutes.Settings ? "black" : "white"}
-						_hover={{ bgColor: "green.2s00", textColor: "black" }}
+						_hover={{ bgColor: "green.200", textColor: "black" }}
 						fontSize="lg"
 						onClick={() => navigate(AppRoutes.Settings)}
 						overflowWrap="break-word"
@@ -203,91 +220,12 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 						<Box mr="4">
 							<FaCog size="24" />
 						</Box>
-						<Text opacity={isSidebarOpen ? "100%" : "0%"}>Settings</Text>
+						<Text opacity={isSidebarOpen ? "100%" : "0%"} transition="0.2s ease-in">
+							Settings
+						</Text>
 					</Button>
-
-					{/* {sidebarItems.map((item, index) => (
-						<SidebarItem
-							key={index}
-							icon={item.icon}
-							link={item.link}
-							isSidebarOpen={isSidebarOpen}
-							tooltipLabel={item.name}
-						>
-							<Text
-								fontSize="md"
-								opacity={isSidebarOpen ? "1" : "0"}
-								transition="opacity 0.2s ease-in"
-							>
-								{item.name}
-							</Text>
-						</SidebarItem>
-					))} */}
 				</VStack>
 			</Box>
 		</Box>
 	);
-
-	/*
-	return (
-		<Box
-			h="full"
-			w={isSidebarOpen ? "96" : "20"}
-			p="4"
-			bgColor="gray.700"
-			// onMouseEnter={() => setIsHovered(true)}
-			// onMouseLeave={() => setIsHovered(false)}
-			transition="all 1s cubic-ease-in-out"
-			overflow="hidden"
-		>
-			<VStack spacing="6" align={isSidebarOpen ? "start" : "center"}>
-				<Avatar size="md" onClick={() => navigate(AppRoutes.Settings)} />
-				<IconButton aria-label="Expand sidebar" onClick={onToggle}>
-					<FaLongArrowAltRight />
-				</IconButton>
-				<Divider />
-				<Menu offset={[0, 15]} preventOverflow={true}>
-					<MenuButton
-						as={IconButton}
-						size="lg"
-						aria-label="Boards"
-						variant="sidebar"
-						borderRadius="12"
-						_active={{ border: "3px solid" }}
-						icon={<FaChalkboard size={24} />}
-					/>
-					<MenuList>
-						{boards?.map(board => (
-							<MenuItem
-								key={board.id}
-								onClick={() => {
-									if (location.pathname !== AppRoutes.Board) {
-										navigate(AppRoutes.Board);
-									}
-									dispatch(setCurrentBoard(board));
-								}}
-							>
-								<Text>{board.name}</Text>
-							</MenuItem>
-						))}
-					</MenuList>
-				</Menu>
-				<Tooltip label="Settings" hasArrow placement="right" openDelay={500}>
-					<IconButton
-						size="lg"
-						aria-label="Settings"
-						variant="sidebar"
-						borderRadius="12"
-						_active={{ border: "3px solid" }}
-						onClick={() => {
-							navigate(AppRoutes.Settings);
-						}}
-					>
-						<FaCog size={24} />
-					</IconButton>
-				</Tooltip>
-			</VStack>
-		</Box>
-	);
-	*/
 };
