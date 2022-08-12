@@ -23,7 +23,7 @@ const boards = api.injectEndpoints({
 			providesTags: cacheUtils.cacheByIdArg(ApiTags.Boards),
 		}),
 
-		addBoard: builder.mutation<void, Pick<iBoard, "name" | "authorId">>({
+		addBoard: builder.mutation<iBoard, Pick<iBoard, "name" | "authorId">>({
 			query: ({ name, authorId }) => ({
 				url: `/boards`,
 				method: "POST",
