@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
-import { FaBox, FaFolderPlus } from "react-icons/fa";
+import { FaBars, FaBox, FaCog, FaCogs, FaFolderPlus, FaHamburger } from "react-icons/fa";
 
 import {
 	Box,
@@ -12,7 +12,9 @@ import {
 	Flex,
 	Heading,
 	HStack,
+	IconButton,
 	Input,
+	Spacer,
 	Spinner,
 	Text,
 	Tooltip,
@@ -31,6 +33,8 @@ import { EditCardModal } from "./components/EditCardModal";
 import { Folder } from "./components/Folder";
 import { useBoards } from "../../main/ui/MainView";
 import { useAppSelector } from "../../../hooks/useAppSelector";
+import { EditFolderModal } from "./components/EditFolderModal";
+import { Toast } from "../../../common-components/toast";
 
 const LoadingBoardsIndicator: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
 	const [pollingInterval, setPollingInterval] = useState(0);
@@ -99,10 +103,20 @@ export const BoardPage: React.FC<{}> = props => {
 		}
 
 		setIsAddingFolderMode(false);
-		await addFolder({
-			name: folderName,
-			boardId: currentBoard.id,
-		});
+
+		try {
+			await addFolder({
+				name: folderName,
+				boardId: currentBoard.id,
+			}).unwrap();
+			Toast({ description: `${folderName} created!`, colorScheme: "green" });
+		} catch (e) {
+			console.log(e);
+			Toast({
+				description: "Could not add folder. Please try again.",
+				colorScheme: "green",
+			});
+		}
 	};
 
 	if (isLoadingBoards) return <LoadingBoardsIndicator isLoading={isLoadingBoards} />;
@@ -118,7 +132,12 @@ export const BoardPage: React.FC<{}> = props => {
 				overflowY="hidden"
 				bgColor="white"
 			>
-				<Heading ml="4">{currentBoard.name}</Heading>
+				<HStack spacing="8">
+					<Heading ml="4">{currentBoard.name}</Heading>
+					<IconButton aria-label="Board Settings" size="lg">
+						<FaCog />
+					</IconButton>
+				</HStack>
 				<StrictModeDroppable
 					droppableId={currentBoard.id}
 					direction="horizontal"
@@ -198,6 +217,7 @@ export const BoardPage: React.FC<{}> = props => {
 			</VStack>
 
 			<EditCardModal />
+			<EditFolderModal />
 		</DragDropContext>
 	);
 };
