@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-import { Draggable, Droppable } from "react-beautiful-dnd";
-import { FaPlusSquare } from "react-icons/fa";
+import { Draggable } from "react-beautiful-dnd";
+import { FaPen, FaPlusSquare } from "react-icons/fa";
 
 import {
 	Box,
@@ -14,17 +14,16 @@ import {
 	SlideFade,
 	Spinner,
 	Text,
-	VStack,
-	Wrap,
-	WrapItem,
+	useBoolean,
 } from "@chakra-ui/react";
 
 import { useAddCardMutation, useGetFolderCardsQuery } from "../../../../app/services/cards";
-import { toast } from "../../../../app/slices/ui/toast";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { iCard, iFolder } from "../../../../utils/models";
 import { StrictModeDroppable } from "../../../../utils/StrictModeDroppable";
 import { Card } from "./Card";
+import { openModal, setEditFolderTarget } from "../../../../app/slices/ui/modals";
+import { Toast } from "../../../../common-components/toast";
 
 interface Props {
 	folder: iFolder;
@@ -39,6 +38,7 @@ export const Folder: React.FC<Props> = props => {
 
 	const { data: cards, isLoading: isLoadingCards } = useGetFolderCardsQuery(folder.id);
 	const [addCard, { isLoading: isAddingCard }] = useAddCardMutation();
+	const [isHovered, { on: onHover, off: offHover }] = useBoolean(false);
 	const [isAddingCardMode, setIsAddingCardMode] = useState(false);
 
 	const handleAddCard = async (cardName: string) => {
@@ -53,11 +53,10 @@ export const Folder: React.FC<Props> = props => {
 			name: cardName,
 			folderId: folder.id,
 		});
-		dispatch(
-			toast({
-				content: `'${cardName}' added!`,
-			})
-		);
+		Toast({
+			description: `'${cardName}' added!`,
+			colorScheme: "green",
+		});
 	};
 
 	const performAction = useCallback(
@@ -96,7 +95,29 @@ export const Folder: React.FC<Props> = props => {
 
 	const memoizedFolder = useMemo(() => {
 		return (
-			<Box w="72" p="2" bgColor="gray.200" borderRadius="6">
+			<Box
+				w="72"
+				p="2"
+				bgColor="gray.200"
+				borderRadius="6"
+				pos="relative"
+				onMouseEnter={onHover}
+				onMouseLeave={offHover}
+			>
+				{isHovered && (
+					<Box
+						w="full"
+						pos="absolute"
+						left="64"
+						top="4"
+						onClick={() => {
+							dispatch(setEditFolderTarget(folder));
+							dispatch(openModal("editFolder"));
+						}}
+					>
+						<FaPen opacity="30%" />
+					</Box>
+				)}
 				<Text alignSelf="start" fontWeight="semibold" mt="2" ml="2">
 					{folder.name}
 				</Text>
@@ -113,7 +134,7 @@ export const Folder: React.FC<Props> = props => {
 								even while dragging. This causes the placeholder to be offsetted by the top margin of the
 								first element. */}
 								<Flex
-									mt="4"
+									mt="2"
 									p="2"
 									pb="-2"
 									ref={innerRef}
@@ -130,6 +151,17 @@ export const Folder: React.FC<Props> = props => {
 										scrollbarColor: "gray.500 gray.600",
 									}}
 								>
+									{cards?.length === 0 && (
+										<Text
+											textAlign="center"
+											fontWeight="bold"
+											fontSize="md"
+											textColor="gray.400"
+											my="6"
+										>
+											No cards in this folder.
+										</Text>
+									)}
 									{cards?.map((card, index) => (
 										<Draggable
 											key={card.id}
@@ -210,7 +242,7 @@ export const Folder: React.FC<Props> = props => {
 				)}
 			</Box>
 		);
-	}, [cards, isAddingCardMode]);
+	}, [cards, isAddingCardMode, isHovered]);
 
 	return memoizedFolder;
 };
