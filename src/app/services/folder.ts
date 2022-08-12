@@ -46,6 +46,28 @@ const folders = api.injectEndpoints({
 			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Folders),
 		}),
 
+		editFolder: builder.mutation<void, Pick<iFolder, "id"> & Partial<Omit<iFolder, "boardId">>>(
+			{
+				query: ({ id, name, description }) => ({
+					url: `/folders/${id}`,
+					method: "PUT",
+					body: {
+						name,
+						description,
+					},
+				}),
+			}
+		),
+
+		deleteFolder: builder.mutation<void, Pick<iFolder, "id">>({
+			query: ({ id }) => ({
+				url: `/folders/${id}`,
+				method: "DELETE",
+			}),
+
+			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Folders),
+		}),
+
 		moveFolder: builder.mutation<void, Pick<iFolder, "id"> & { index: number }>({
 			query: ({ id, index }) => ({
 				url: `/folders/${id}/move`,
@@ -70,8 +92,16 @@ const folders = api.injectEndpoints({
 					patchResult.undo();
 				}
 			},
+
+			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Folders),
 		}),
 	}),
 });
 
-export const { useGetBoardFoldersQuery, useAddFolderMutation, useMoveFolderMutation } = folders;
+export const {
+	useGetBoardFoldersQuery,
+	useAddFolderMutation,
+	useEditFolderMutation,
+	useDeleteFolderMutation,
+	useMoveFolderMutation,
+} = folders;
