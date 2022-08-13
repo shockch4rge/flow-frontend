@@ -69,7 +69,7 @@ const authService = api.injectEndpoints({
 			Pick<iUser, "id"> & Partial<Pick<iUser, "username" | "email" | "name">>
 		>({
 			query: user => ({
-				url: `/users/${user.id}`,
+				url: `/auth/${user.id}`,
 				method: "PUT",
 				body: user,
 			}),
@@ -77,15 +77,15 @@ const authService = api.injectEndpoints({
 
 		resetPassword: builder.mutation<void, Pick<iUser, "email">>({
 			query: ({ email }) => ({
-				url: `/users/reset-password`,
+				url: `/auth/reset-password`,
 				method: "POST",
 				body: { email },
 			}),
 		}),
 
-		deleteUser: builder.mutation<void, Pick<iUser, "id"> & JwtToken>({
-			query: ({ id, token }) => ({
-				url: `/users/${id}`,
+		deleteUser: builder.mutation<void, void>({
+			query: () => ({
+				url: `/auth/destroy`,
 				method: "DELETE",
 			}),
 		}),
