@@ -1,7 +1,10 @@
 import { MutationDefinition } from "@reduxjs/toolkit/dist/query";
 import { UseMutation } from "@reduxjs/toolkit/dist/query/react/buildHooks";
-import { createContext, PropsWithChildren, useCallback, useState } from "react";
+import { createContext, PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../hooks/useAppSelector";
 import { iUser } from "../../utils/models";
+import { AppRoutes } from "../../utils/routes";
 import {
 	useCreateUserMutation,
 	useDeleteUserMutation,
@@ -32,20 +35,21 @@ type MutationParams<M> = M extends UseMutation<infer D>
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
-	const [user, setUser] = useState<iUser | null>(null);
+	const navigate = useNavigate();
 	const [login] = useLoginUserMutation();
 	const [signOut] = useSignOutUserMutation();
 	const [create] = useCreateUserMutation();
 	const [_delete] = useDeleteUserMutation();
 	const [update] = useUpdateUserMutation();
 	const [resetPassword] = useResetPasswordMutation();
+	const {user, token} = useAppSelector(state => state.auth);
 
 	const loginUser = useCallback(async (params: MutationParams<typeof useLoginUserMutation>) => {
 		try {
-			const authenticatedUser = await login(params).unwrap();
-			setUser(authenticatedUser);
+			await login(params).unwrap();
 			console.log("Logged in user");
 		} catch (e) {
+			console.warn(e);
 			console.log("Could not login user");
 		}
 	}, []);
@@ -54,7 +58,6 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 		async (params: MutationParams<typeof useSignOutUserMutation>) => {
 			try {
 				await signOut(params).unwrap();
-				setUser(null);
 				console.log("Signed out user");
 			} catch (e) {
 				console.log("Could not sign out user");
@@ -65,8 +68,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
 	const createUser = useCallback(async (params: MutationParams<typeof useCreateUserMutation>) => {
 		try {
-			const createdUser = await create(params).unwrap();
-			setUser(createdUser);
+			await create(params).unwrap();
 			console.log("Created user");
 		} catch (e) {
 			console.log("Could not create user");
@@ -76,7 +78,6 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 	const deleteUser = useCallback(async (params: MutationParams<typeof useDeleteUserMutation>) => {
 		try {
 			await _delete(params).unwrap();
-			setUser(null);
 			console.log("Deleted user");
 		} catch (e) {
 			console.log("Could not delete user");
@@ -85,8 +86,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
 	const updateUser = useCallback(async (params: MutationParams<typeof useUpdateUserMutation>) => {
 		try {
-			const updatedUser = await update(params).unwrap();
-			setUser(updatedUser);
+			await update(params).unwrap();
 			console.log("Updated user");
 		} catch (e) {
 			console.log("Could not update user");
@@ -104,6 +104,15 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 		},
 		[]
 	);
+
+	useEffect(() => {
+		if (!token) {
+			navigate(AppRoutes.Landing);
+			return;
+		}
+
+		navigate(AppRoutes.Board);
+	}, [token]);
 
 	return (
 		<AuthContext.Provider

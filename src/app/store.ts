@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 import api from "./services/api";
+import authSlice from "./slices/auth";
 import boardSlice from "./slices/board";
 import drawerSlice from "./slices/ui/drawers";
 import modalSlice from "./slices/ui/modals";
@@ -12,6 +13,7 @@ const uiReducer = combineReducers({
 
 const rootReducer = combineReducers({
 	[api.reducerPath]: api.reducer,
+	[authSlice.name]: authSlice.reducer,
 	[boardSlice.name]: boardSlice.reducer,
 	ui: uiReducer,
 });

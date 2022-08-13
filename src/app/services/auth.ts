@@ -1,42 +1,55 @@
-import cacheUtils from "../../utils/cacheUtils";
 import { iUser } from "../../utils/models";
-import api, { ApiTags, authHeaders } from "./api";
+import api from "./api";
 
 type JwtToken = { token: string };
 
-const auth = api.injectEndpoints({
+type AuthorizedResponse = {
+	status: {
+		result: string;
+		message: string;
+	};
+	user: iUser;
+	authorization: JwtToken & { type: string };
+};
+
+export const auth = api.injectEndpoints({
 	overrideExisting: false,
 
 	endpoints: builder => ({
 		getUser: builder.query<iUser, iUser["id"]>({
 			query: userId => ({
-				url: `/users/${userId}`,
+				url: `/auth/${userId}`,
 				method: "GET",
 			}),
 		}),
 
-		loginUser: builder.mutation<iUser, Pick<iUser, "email"> & { password: string } & JwtToken>({
-			query: ({ email, password, token }) => ({
-				url: `/users/login`,
+		loginUser: builder.mutation<
+			AuthorizedResponse,
+			Pick<iUser, "email"> & { password: string }
+		>({
+			query: ({ email, password }) => ({
+				url: `/auth/login`,
 				method: "POST",
-				data: { email, password },
-				headers: authHeaders(token),
+				body: { email, password },
 			}),
 		}),
 
-		signOutUser: builder.mutation<void, JwtToken>({
-			query: ({ token }) => ({
-				url: "/users/signout",
+		signOutUser: builder.mutation<void, void>({
+			query: () => ({
+				url: "/auth/logout",
 				method: "POST",
-				headers: authHeaders(token),
+				// headers: authHeaders(token),
 			}),
 		}),
 
-		createUser: builder.mutation<iUser, Pick<iUser, "name" | "email"> & { password: string }>({
+		createUser: builder.mutation<
+			AuthorizedResponse,
+			Pick<iUser, "name" | "email"> & { password: string }
+		>({
 			query: ({ email, name, password }) => ({
-				url: `/users`,
+				url: `/register`,
 				method: "POST",
-				data: {
+				body: {
 					email,
 					name,
 					password,
@@ -46,22 +59,22 @@ const auth = api.injectEndpoints({
 
 		updateUser: builder.mutation<
 			iUser,
-			Pick<iUser, "id"> & Partial<Pick<iUser, "username" | "email" | "name">> & JwtToken
+			Pick<iUser, "id"> & Partial<Pick<iUser, "username" | "email" | "name">>
 		>({
-			query: ({ token, ...user }) => ({
+			query: user => ({
 				url: `/users/${user.id}`,
 				method: "PUT",
-				data: user,
-				headers: authHeaders(token),
+				body: user,
+				// headers: authHeaders(token),
 			}),
 		}),
 
-		resetPassword: builder.mutation<void, Pick<iUser, "email"> & JwtToken>({
-			query: ({ email, token }) => ({
+		resetPassword: builder.mutation<void, Pick<iUser, "email">>({
+			query: ({ email }) => ({
 				url: `/users/reset-password`,
 				method: "POST",
-				data: { email },
-				headers: authHeaders(token),
+				body: { email },
+				// headers: authHeaders(token),
 			}),
 		}),
 
@@ -69,7 +82,7 @@ const auth = api.injectEndpoints({
 			query: ({ id, token }) => ({
 				url: `/users/${id}`,
 				method: "DELETE",
-				headers: authHeaders(token),
+				// headers: authHeaders(token),
 			}),
 		}),
 	}),
