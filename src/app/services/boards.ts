@@ -34,12 +34,71 @@ const boardService = api.injectEndpoints({
 
 			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Boards),
 		}),
+
+		editBoard: builder.mutation<void, Pick<iBoard, "id"> & Partial<Omit<iBoard, "authorId">>>({
+			query: ({ id, name, description }) => ({
+				url: `/boards/${id}`,
+				method: "PUT",
+				body: {
+					name,
+					description,
+				},
+			}),
+
+			onQueryStarted: async ({ id, name, description }, { dispatch, queryFulfilled }) => {
+				const patchResult = dispatch(
+					boardService.util.updateQueryData("getUserBoards", id, boards => {
+						const index = boards.findIndex(b => b.id === id);
+
+						if (index) {
+							name && (boards[index].name = name);
+							description && (boards[index].description = description);
+						}
+					})
+				);
+
+				try {
+					await queryFulfilled;
+				} catch (e) {
+					patchResult.undo();
+				}
+			},
+
+			invalidatesTags: cacheUtils.invalidatesList(ApiTags.Boards),
+		}),
+
+		deleteBoard: builder.mutation<void, Pick<iBoard, "id">>({
+			query: ({ id }) => ({
+				url: `/boards/${id}`,
+				method: "DELETE",
+			}),
+
+			onQueryStarted: async ({ id }, { dispatch, queryFulfilled }) => {
+				const patchResult = dispatch(
+					boardService.util.updateQueryData("getUserBoards", id, boards => {
+						const index = boards.findIndex(board => board.id === id);
+
+						if (index) {
+							boards.splice(index, 1);
+						}
+					})
+				);
+
+				try {
+					await queryFulfilled;
+				} catch (e) {
+					patchResult.undo();
+				}
+			},
+		}),
 	}),
 });
 
 export const {
 	useGetBoardQuery,
 	useAddBoardMutation,
+	useEditBoardMutation,
+	useDeleteBoardMutation,
 	useLazyGetUserBoardsQuery,
 	useGetUserBoardsQuery,
 } = boardService;
