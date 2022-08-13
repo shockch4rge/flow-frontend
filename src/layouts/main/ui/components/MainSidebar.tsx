@@ -160,28 +160,26 @@ export const MainSidebar: React.FC<Props> = ({ boards }) => {
 								</h2>
 								{boards?.map((board, index) => {
 									return (
-										<>
-											<AccordionPanel
-												pt="4"
-												key={board.id}
-												bgColor="gray.700"
-												_hover={{ bgColor: "gray.600" }}
-												transition="0.1s ease-in"
-												cursor="pointer"
-												textColor="gray.200"
-												onClick={() => {
-													dispatch(setCurrentBoard(board));
-													localStorage.setItem(
-														"lastEditedBoard",
-														index.toString()
-													);
-													navigate(AppRoutes.Board);
-												}}
-											>
-												{board.name}
-												<Divider />
-											</AccordionPanel>
-										</>
+										<AccordionPanel
+											pt="4"
+											key={board.id}
+											bgColor="gray.700"
+											_hover={{ bgColor: "gray.600" }}
+											transition="0.1s ease-in"
+											cursor="pointer"
+											textColor="gray.200"
+											onClick={() => {
+												dispatch(setCurrentBoard(board));
+												localStorage.setItem(
+													"lastEditedBoard",
+													index.toString()
+												);
+												navigate(AppRoutes.Board);
+											}}
+										>
+											{board.name}
+											<Divider />
+										</AccordionPanel>
 									);
 								})}
 								<AccordionPanel
