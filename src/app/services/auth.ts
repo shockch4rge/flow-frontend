@@ -16,6 +16,13 @@ const authService = api.injectEndpoints({
 	overrideExisting: false,
 
 	endpoints: builder => ({
+		getCurrentUser: builder.query<{ status: {}, user: iUser }, void>({
+			query: () => ({
+				url: "/auth/me",
+				method: "GET",
+			}),
+		}),
+		
 		getUser: builder.query<iUser, iUser["id"]>({
 			query: userId => ({
 				url: `/auth/${userId}`,
@@ -38,20 +45,20 @@ const authService = api.injectEndpoints({
 			query: () => ({
 				url: "/auth/logout",
 				method: "POST",
-				// headers: authHeaders(token),
 			}),
 		}),
 
 		createUser: builder.mutation<
 			AuthorizedResponse,
-			Pick<iUser, "name" | "email"> & { password: string }
+			Pick<iUser, "name" | "email" | "username"> & { password: string }
 		>({
-			query: ({ email, name, password }) => ({
-				url: `/register`,
+			query: ({ email, name, password, username }) => ({
+				url: `/auth/register`,
 				method: "POST",
 				body: {
-					email,
 					name,
+					username,
+					email,
 					password,
 				},
 			}),
@@ -65,7 +72,6 @@ const authService = api.injectEndpoints({
 				url: `/users/${user.id}`,
 				method: "PUT",
 				body: user,
-				// headers: authHeaders(token),
 			}),
 		}),
 
@@ -74,7 +80,6 @@ const authService = api.injectEndpoints({
 				url: `/users/reset-password`,
 				method: "POST",
 				body: { email },
-				// headers: authHeaders(token),
 			}),
 		}),
 
@@ -82,7 +87,6 @@ const authService = api.injectEndpoints({
 			query: ({ id, token }) => ({
 				url: `/users/${id}`,
 				method: "DELETE",
-				// headers: authHeaders(token),
 			}),
 		}),
 	}),
@@ -95,6 +99,7 @@ export const {
 	useUpdateUserMutation,
 	useResetPasswordMutation,
 	useDeleteUserMutation,
+	useGetCurrentUserQuery,
 } = authService;
 
 export default authService;

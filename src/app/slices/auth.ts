@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { iUser } from "../../utils/models";
 import authService from "../services/auth";
 
@@ -8,7 +8,7 @@ type AuthState = {
 };
 
 const initialState: AuthState = {
-	token: null,
+	token: localStorage.getItem("token") ?? null,
 	user: null,
 };
 
@@ -16,11 +16,34 @@ const authSlice = createSlice({
 	name: "auth",
 	initialState,
 	reducers: {},
-	extraReducers: ({ addMatcher }) => {
-		addMatcher(authService.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
-			state.token = payload.authorization.token;
-			state.user = payload.user;
-		});
+	extraReducers: builder => {
+		builder
+			.addMatcher(authService.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
+				localStorage.setItem("token", payload.authorization.token);
+				state.token = localStorage.getItem("token")!;
+				state.user = payload.user;
+			})
+			.addMatcher(authService.endpoints.createUser.matchFulfilled, (state, { payload }) => {
+				localStorage.setItem("token", payload.authorization.token);
+				state.token = localStorage.getItem("token")!;
+				state.user = payload.user;
+			})
+			.addMatcher(
+				authService.endpoints.getCurrentUser.matchFulfilled,
+				(state, { payload }) => {
+					state.user = payload.user;
+				}
+			)
+			.addMatcher(authService.endpoints.signOutUser.matchFulfilled, state => {
+				localStorage.removeItem("token");
+				state.token = null;
+				state.user = null;
+			})
+			.addMatcher(authService.endpoints.deleteUser.matchFulfilled, state => {
+				localStorage.removeItem("token");
+				state.token = null;
+				state.user = null;
+			});
 	},
 });
 
