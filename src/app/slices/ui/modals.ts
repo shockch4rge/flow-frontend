@@ -14,6 +14,8 @@ interface EditFolderModalState extends BaseModalState {
 	target?: iFolder;
 }
 
+interface EditBoardModalState extends BaseModalState {}
+
 interface AddBoardModalState extends BaseModalState {}
 
 interface UserLoginModalState extends BaseModalState {}
@@ -22,7 +24,14 @@ interface UserSignUpModalState extends BaseModalState {}
 
 interface ResetPasswordModalState extends BaseModalState {}
 
-type ModalTypes = "editCard" | "editFolder" | "addBoard" | "login" | "signup" | "resetPassword";
+type ModalTypes =
+	| "editCard"
+	| "editFolder"
+	| "editBoard"
+	| "addBoard"
+	| "login"
+	| "signup"
+	| "resetPassword";
 
 const initialState = {
 	editCard: {
@@ -40,6 +49,9 @@ const initialState = {
 	editFolder: {
 		open: false,
 	} as EditFolderModalState,
+	editBoard: {
+		open: false,
+	} as EditBoardModalState,
 	addBoard: {
 		open: false,
 	} as AddBoardModalState,

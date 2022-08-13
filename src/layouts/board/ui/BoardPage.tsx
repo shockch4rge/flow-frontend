@@ -36,6 +36,7 @@ import { useAppSelector } from "../../../hooks/useAppSelector";
 import { EditFolderModal } from "./components/EditFolderModal";
 import { Toast } from "../../../common-components/toast";
 import { openModal } from "../../../app/slices/ui/modals";
+import { EditBoardModal } from "./components/EditBoardModal";
 
 const AddBoardPage: React.FC<{}> = () => {
 	const dispatch = useAppDispatch();
@@ -128,7 +129,11 @@ export const BoardPage: React.FC<{}> = props => {
 			>
 				<HStack spacing="8">
 					<Heading ml="4">{currentBoard.name}</Heading>
-					<IconButton aria-label="Board Settings" size="lg">
+					<IconButton
+						aria-label="Board Settings"
+						size="lg"
+						onClick={() => dispatch(openModal("editBoard"))}
+					>
 						<FaCog />
 					</IconButton>
 				</HStack>
@@ -212,6 +217,7 @@ export const BoardPage: React.FC<{}> = props => {
 
 			<EditCardModal />
 			<EditFolderModal />
+			<EditBoardModal />
 		</DragDropContext>
 	);
 };
