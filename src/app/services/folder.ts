@@ -100,6 +100,7 @@ const folderService = api.injectEndpoints({
 
 export const {
 	useGetBoardFoldersQuery,
+	useLazyGetBoardFoldersQuery,
 	useAddFolderMutation,
 	useEditFolderMutation,
 	useDeleteFolderMutation,
