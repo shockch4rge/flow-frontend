@@ -25,57 +25,51 @@ import { useMoveCardMutation } from "../../../app/services/cards";
 import {
 	useAddFolderMutation,
 	useGetBoardFoldersQuery,
+	useLazyGetBoardFoldersQuery,
 	useMoveFolderMutation,
 } from "../../../app/services/folder";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { StrictModeDroppable } from "../../../utils/StrictModeDroppable";
 import { EditCardModal } from "./components/EditCardModal";
 import { Folder } from "./components/Folder";
-import { useBoards } from "../../main/ui/MainView";
 import { useAppSelector } from "../../../hooks/useAppSelector";
 import { EditFolderModal } from "./components/EditFolderModal";
 import { Toast } from "../../../common-components/toast";
+import { openModal } from "../../../app/slices/ui/modals";
 
-const LoadingBoardsIndicator: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
-	const [pollingInterval, setPollingInterval] = useState(0);
-
-	useEffect(() => {
-		if (!isLoading) return;
-		setTimeout(() => setPollingInterval(v => v + 10000), 10000);
-	}, [isLoading]);
+const AddBoardPage: React.FC<{}> = () => {
+	const dispatch = useAppDispatch();
 
 	return (
 		<Center w="full">
-			<VStack>
-				<Spinner />
-				<Heading>Loading your boards...</Heading>
-				{pollingInterval > 0 && (
-					<Text>
-						We're having trouble at the moment. Refetching in {pollingInterval / 1000}{" "}
-						seconds.
-					</Text>
-				)}
+			<VStack spacing="6">
+				<Heading>Create a new board</Heading>
+				<Button variant="primary" onClick={() => dispatch(openModal("addBoard"))}>
+					Create
+				</Button>
 			</VStack>
-		</Center>
-	);
-};
-
-const CreateNewBoardPage: React.FC<{}> = () => {
-	return (
-		<Center>
-			<Heading>Create a new board</Heading>
 		</Center>
 	);
 };
 
 export const BoardPage: React.FC<{}> = props => {
 	const dispatch = useAppDispatch();
-	const { currentBoard, isLoadingBoards } = useBoards();
+	const currentBoard = useAppSelector(state => state.boards.current)!;
 	const [isAddingFolderMode, setIsAddingFolderMode] = useState(false);
-	const { data: folders } = useGetBoardFoldersQuery(currentBoard.id);
+	const [getBoardFolders, { data: folders }] = useLazyGetBoardFoldersQuery();
 	const [moveCard] = useMoveCardMutation();
 	const [moveFolder] = useMoveFolderMutation();
 	const [addFolder] = useAddFolderMutation();
+
+	useEffect(() => {
+		if (!currentBoard) return;
+		document.title = `${currentBoard.name} | Flow`;
+	}, [currentBoard]);
+
+	useEffect(() => {
+		if (!currentBoard) return;
+		getBoardFolders(currentBoard.id);
+	}, [currentBoard]);
 
 	const onDragEnd = useCallback(async (result: DropResult) => {
 		const { destination, source, draggableId, type } = result;
@@ -119,7 +113,7 @@ export const BoardPage: React.FC<{}> = props => {
 		}
 	};
 
-	if (isLoadingBoards) return <LoadingBoardsIndicator isLoading={isLoadingBoards} />;
+	if (!currentBoard) return <AddBoardPage />;
 
 	return (
 		<DragDropContext onDragEnd={onDragEnd}>

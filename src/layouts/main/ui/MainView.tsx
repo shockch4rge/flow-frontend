@@ -1,48 +1,60 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useOutletContext } from "react-router-dom";
 
-import { Box, HStack } from "@chakra-ui/react";
+import { Box, Center, Heading, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 
 import { useGetUserBoardsQuery } from "../../../app/services/boards";
 import { setCurrentBoard } from "../../../app/slices/board";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../hooks/useAppSelector";
-import { MOCK_USER_ID } from "../../../utils/mockData";
 import { MainSidebar } from "./components/MainSidebar";
 import { iBoard } from "../../../utils/models";
 import { AddBoardModal } from "./components/AddBoardModal";
+import { useAuthContext } from "../../../hooks/useAuthContext";
+import { useGetCurrentUserQuery } from "../../../app/services/auth";
 
 export const MainView: React.FC = () => {
 	const dispatch = useAppDispatch();
-	const currentBoard = useAppSelector(state => state.boards.current);
+	const { user } = useAuthContext();
+	const { data: boards, isLoading: isLoadingBoards } = useGetUserBoardsQuery(user!.id);
 
-	const {
-		data: boards,
-		isLoading: isLoadingBoards,
-		isSuccess: hasFetchedBoards,
-	} = useGetUserBoardsQuery(MOCK_USER_ID);
-
-	useEffect(() => {
-		if (!boards) return;
-		dispatch(setCurrentBoard(boards[+localStorage.getItem("lastEditedBoard")! ?? 0]));
-	}, [boards]);
-
-	useEffect(() => {
-		if (!currentBoard) return;
-		document.title = `${currentBoard.name} | Flow`;
-	}, [currentBoard]);
+	
 
 	return (
 		<Box>
 			<HStack h="100vh" overflow="hidden" spacing="0">
 				<MainSidebar boards={boards} />
-				{currentBoard && <Outlet context={{ currentBoard, isLoadingBoards }} />}
+				{isLoadingBoards ? (
+					<LoadingBoardsIndicator isLoading={isLoadingBoards} />
+				) : (
+					<Outlet />
+				)}
 			</HStack>
 			<AddBoardModal />
 		</Box>
 	);
 };
 
-export const useBoards = () => {
-	return useOutletContext<{ currentBoard: iBoard; isLoadingBoards: boolean }>();
+const LoadingBoardsIndicator: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
+	const [pollingInterval, setPollingInterval] = useState(0);
+
+	useEffect(() => {
+		if (!isLoading) return;
+		setTimeout(() => setPollingInterval(v => v + 10000), 10000);
+	}, [isLoading]);
+
+	return (
+		<Center w="full">
+			<VStack>
+				<Spinner />
+				<Heading>Loading your boards...</Heading>
+				{pollingInterval > 0 && (
+					<Text>
+						We're having trouble at the moment. Refetching in {pollingInterval / 1000}{" "}
+						seconds.
+					</Text>
+				)}
+			</VStack>
+		</Center>
+	);
 };
