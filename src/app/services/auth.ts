@@ -89,6 +89,13 @@ const authService = api.injectEndpoints({
 				method: "DELETE",
 			}),
 		}),
+
+		refreshAuth: builder.query<AuthorizedResponse, void>({
+			query: () => ({
+				url: `/auth/refresh`,
+				method: "GET",
+			}),
+		}),
 	}),
 });
 
@@ -100,6 +107,7 @@ export const {
 	useResetPasswordMutation,
 	useDeleteUserMutation,
 	useGetCurrentUserQuery,
+	useLazyRefreshAuthQuery
 } = authService;
 
 export default authService;

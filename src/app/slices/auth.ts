@@ -43,6 +43,11 @@ const authSlice = createSlice({
 				localStorage.removeItem("token");
 				state.token = null;
 				state.user = null;
+			})
+			.addMatcher(authService.endpoints.refreshAuth.matchFulfilled, (state, { payload }) => {
+				localStorage.setItem("token", payload.authorization.token);
+				state.token = localStorage.getItem("token")!;
+				state.user = payload.user;
 			});
 	},
 });
