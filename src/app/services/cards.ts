@@ -3,7 +3,7 @@ import { iCard } from "../../utils/models";
 import api, { ApiTags } from "./api";
 import { v4 as uuid } from "uuid";
 
-const cards = api.injectEndpoints({
+const cardService = api.injectEndpoints({
 	endpoints: builder => ({
 		getFolderCards: builder.query<iCard[], iCard["folderId"]>({
 			query: folderId => ({
@@ -25,7 +25,7 @@ const cards = api.injectEndpoints({
 
 			onQueryStarted: async ({ folderId, name }, { dispatch, queryFulfilled }) => {
 				const patchResult = dispatch(
-					cards.util.updateQueryData("getFolderCards", folderId, cards => {
+					cardService.util.updateQueryData("getFolderCards", folderId, cards => {
 						cards.push({
 							components: [],
 							description: "",
@@ -63,7 +63,7 @@ const cards = api.injectEndpoints({
 				{ dispatch, queryFulfilled }
 			) => {
 				const patchResult = dispatch(
-					cards.util.updateQueryData("getFolderCards", id, cards => {
+					cardService.util.updateQueryData("getFolderCards", id, cards => {
 						const card = cards.find(card => card.id === id);
 
 						if (card) {
@@ -102,7 +102,7 @@ const cards = api.injectEndpoints({
 
 			onQueryStarted: async ({ id, folderId, index }, { dispatch, queryFulfilled }) => {
 				const patchResult = dispatch(
-					cards.util.updateQueryData("getFolderCards", folderId, cards => {
+					cardService.util.updateQueryData("getFolderCards", folderId, cards => {
 						const card = cards.find(card => card.id === id);
 
 						if (!card) return;
@@ -130,4 +130,6 @@ export const {
 	useDeleteCardMutation,
 	useGetFolderCardsQuery,
 	useMoveCardMutation,
-} = cards;
+} = cardService;
+
+export default cardService;

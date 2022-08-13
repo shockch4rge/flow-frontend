@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { iUser } from "../../utils/models";
-import { auth } from "../services/auth";
+import authService from "../services/auth";
 
 type AuthState = {
 	token: string | null;
@@ -17,7 +17,7 @@ const authSlice = createSlice({
 	initialState,
 	reducers: {},
 	extraReducers: ({ addMatcher }) => {
-		addMatcher(auth.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
+		addMatcher(authService.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
 			state.token = payload.authorization.token;
 			state.user = payload.user;
 		});

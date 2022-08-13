@@ -12,7 +12,7 @@ type AuthorizedResponse = {
 	authorization: JwtToken & { type: string };
 };
 
-export const auth = api.injectEndpoints({
+const authService = api.injectEndpoints({
 	overrideExisting: false,
 
 	endpoints: builder => ({
@@ -95,4 +95,6 @@ export const {
 	useUpdateUserMutation,
 	useResetPasswordMutation,
 	useDeleteUserMutation,
-} = auth;
+} = authService;
+
+export default authService;

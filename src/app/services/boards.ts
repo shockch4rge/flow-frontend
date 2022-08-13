@@ -2,8 +2,7 @@ import cacheUtils from "../../utils/cacheUtils";
 import { iBoard } from "../../utils/models";
 import api, { ApiTags } from "./api";
 
-
-const boards = api.injectEndpoints({
+const boardService = api.injectEndpoints({
 	endpoints: builder => ({
 		getUserBoards: builder.query<iBoard[], iBoard["authorId"]>({
 			query: userId => ({
@@ -38,5 +37,11 @@ const boards = api.injectEndpoints({
 	}),
 });
 
-export const { useGetBoardQuery, useAddBoardMutation, useLazyGetUserBoardsQuery, useGetUserBoardsQuery } =
-	boards;
+export const {
+	useGetBoardQuery,
+	useAddBoardMutation,
+	useLazyGetUserBoardsQuery,
+	useGetUserBoardsQuery,
+} = boardService;
+
+export default boardService;

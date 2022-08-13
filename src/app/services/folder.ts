@@ -3,7 +3,7 @@ import { iFolder } from "../../utils/models";
 import api, { ApiTags } from "./api";
 import { v4 as uuid } from "uuid";
 
-const folders = api.injectEndpoints({
+const folderService = api.injectEndpoints({
 	endpoints: builder => ({
 		getBoardFolders: builder.query<iFolder[], iFolder["boardId"]>({
 			query: boardId => ({
@@ -26,7 +26,7 @@ const folders = api.injectEndpoints({
 
 			onQueryStarted: async ({ name, boardId }, { dispatch, queryFulfilled }) => {
 				const patchResult = dispatch(
-					folders.util.updateQueryData("getBoardFolders", boardId, folders => {
+					folderService.util.updateQueryData("getBoardFolders", boardId, folders => {
 						folders.push({
 							name,
 							boardId,
@@ -79,7 +79,7 @@ const folders = api.injectEndpoints({
 
 			onQueryStarted: async ({ id, index }, { dispatch, queryFulfilled }) => {
 				const patchResult = dispatch(
-					folders.util.updateQueryData("getBoardFolders", id, folders => {
+					folderService.util.updateQueryData("getBoardFolders", id, folders => {
 						console.log(folders.find(folder => folder.id === id));
 
 						Object.assign(folders.find(folder => folder.id === id)!, index);
@@ -104,4 +104,6 @@ export const {
 	useEditFolderMutation,
 	useDeleteFolderMutation,
 	useMoveFolderMutation,
-} = folders;
+} = folderService;
+
+export default folderService;

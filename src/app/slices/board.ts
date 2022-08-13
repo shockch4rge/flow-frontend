@@ -15,7 +15,7 @@ const boardSlice = createSlice({
 	name: "boards",
 	initialState: initialState,
 	reducers: {
-		setCurrentBoard: (state, action: PayloadAction<iBoard>) => {
+		setCurrentBoard: (state: any, action: PayloadAction<iBoard>) => {
 			state.current = action.payload;
 		},
 	},
