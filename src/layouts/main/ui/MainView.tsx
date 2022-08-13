@@ -18,8 +18,6 @@ export const MainView: React.FC = () => {
 	const { user } = useAuthContext();
 	const { data: boards, isLoading: isLoadingBoards } = useGetUserBoardsQuery(user!.id);
 
-	
-
 	return (
 		<Box>
 			<HStack h="100vh" overflow="hidden" spacing="0">
@@ -36,24 +34,11 @@ export const MainView: React.FC = () => {
 };
 
 const LoadingBoardsIndicator: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
-	const [pollingInterval, setPollingInterval] = useState(0);
-
-	useEffect(() => {
-		if (!isLoading) return;
-		setTimeout(() => setPollingInterval(v => v + 10000), 10000);
-	}, [isLoading]);
-
 	return (
 		<Center w="full">
 			<VStack>
 				<Spinner />
 				<Heading>Loading your boards...</Heading>
-				{pollingInterval > 0 && (
-					<Text>
-						We're having trouble at the moment. Refetching in {pollingInterval / 1000}{" "}
-						seconds.
-					</Text>
-				)}
 			</VStack>
 		</Center>
 	);
