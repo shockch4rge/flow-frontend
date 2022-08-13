@@ -45,6 +45,16 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 	const [resetPassword] = useResetPasswordMutation();
 	const { user, token } = useAppSelector(state => state.auth);
 
+	useEffect(() => {
+		if (!token || !user) {
+			navigate(AppRoutes.Landing, { replace: true });
+			return;
+		}
+
+		navigate(AppRoutes.Board, { replace: true });
+	}, [token, user]);
+
+
 	const loginUser = useCallback(async (params: MutationParams<typeof useLoginUserMutation>) => {
 		try {
 			await login(params).unwrap();
@@ -147,15 +157,6 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 		},
 		[]
 	);
-
-	useEffect(() => {
-		if (!token || !user) {
-			navigate(AppRoutes.Landing);
-			return;
-		}
-
-		navigate(AppRoutes.Board);
-	}, [token, user]);
 
 	return (
 		<AuthContext.Provider
