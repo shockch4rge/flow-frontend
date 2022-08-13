@@ -16,12 +16,10 @@ const authSlice = createSlice({
 	name: "auth",
 	initialState,
 	reducers: {},
-	extraReducers: builder => {
-		builder.addMatcher(auth.endpoints.loginUser.matchFulfilled, (state, action) => {
-			console.log(action.payload.authorization);
-
-			state.token = action.payload.authorization.token;
-			state.user = action.payload.user;
+	extraReducers: ({ addMatcher }) => {
+		addMatcher(auth.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
+			state.token = payload.authorization.token;
+			state.user = payload.user;
 		});
 	},
 });
