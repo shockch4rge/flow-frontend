@@ -31,10 +31,4 @@ const api = createApi({
 	tagTypes: [...cacheUtils.defaultTags, ApiTags.Boards, ApiTags.Folders, ApiTags.Cards],
 });
 
-export const authHeaders = (token: string) => {
-	return {
-		Authorization: `Bearer ${token}`,
-	};
-};
-
 export default api;
