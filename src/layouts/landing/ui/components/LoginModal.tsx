@@ -5,17 +5,40 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
 import {
-    Box, Button, ButtonGroup, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Hide, HStack,
-    IconButton, Image, Input, InputGroup, InputRightElement, Link, Modal, ModalBody,
-    ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, Tooltip, VStack
+	Box,
+	Button,
+	ButtonGroup,
+	Flex,
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
+	Heading,
+	Hide,
+	HStack,
+	IconButton,
+	Image,
+	Input,
+	InputGroup,
+	InputRightElement,
+	Link,
+	Modal,
+	ModalBody,
+	ModalCloseButton,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalOverlay,
+	Spinner,
+	Text,
+	Tooltip,
+	VStack,
 } from "@chakra-ui/react";
 
 import { closeModal, openModal } from "../../../../app/slices/ui/modals";
 import { FlowLogo } from "../../../../common-components";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-import { AppRoutes } from "../../../../utils/routes";
-
+import { useAuthContext } from "../../../../hooks/useAuthContext";
 
 const loginModalName = "login";
 const emailFieldName = "email";
@@ -24,6 +47,7 @@ const passwordFieldName = "password";
 export const LoginModal: React.FC = () => {
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
+	const { user, loginUser } = useAuthContext();
 	const [showPassword, setShowPassword] = useState(false);
 	const { open } = useAppSelector(state => state.ui.modals.login);
 
@@ -45,20 +69,30 @@ export const LoginModal: React.FC = () => {
 						[emailFieldName]: "",
 						[passwordFieldName]: "",
 					}}
-					onSubmit={(values, actions) => {}}
+					onSubmit={async ({ email, password }) => {
+						await loginUser({
+							email,
+							password,
+						});
+						close();
+					}}
 				>
-					{({ errors, touched, isSubmitting, isValid, dirty, getFieldProps }) => (
+					{({ errors, touched, isSubmitting, isValid, getFieldProps }) => (
 						<ModalBody>
 							<Heading textAlign="center" size="lg">
 								Login <Hide below="md">to your account</Hide>
 							</Heading>
 
-							<Form>
+							<Form autoComplete="off">
 								<VStack mt="10" spacing="6" justify="center">
 									<Field name={emailFieldName}>
 										{(props: any) => (
-											<FormControl isInvalid={!!errors.email && touched.email}>
-												<FormLabel htmlFor={emailFieldName}>Email</FormLabel>
+											<FormControl
+												isInvalid={!!errors.email && touched.email}
+											>
+												<FormLabel htmlFor={emailFieldName}>
+													Email
+												</FormLabel>
 												<Input
 													{...getFieldProps(emailFieldName)}
 													id={emailFieldName}
@@ -71,7 +105,9 @@ export const LoginModal: React.FC = () => {
 
 									<Field name={passwordFieldName}>
 										{(props: any) => (
-											<FormControl isInvalid={!!errors.password && touched.password}>
+											<FormControl
+												isInvalid={!!errors.password && touched.password}
+											>
 												<Text
 													mb="-6"
 													textColor="green.400"
@@ -88,7 +124,9 @@ export const LoginModal: React.FC = () => {
 												>
 													Forgot your password?
 												</Text>
-												<FormLabel htmlFor={passwordFieldName}>Password</FormLabel>
+												<FormLabel htmlFor={passwordFieldName}>
+													Password
+												</FormLabel>
 												<InputGroup>
 													<Input
 														{...getFieldProps(passwordFieldName)}
@@ -102,7 +140,9 @@ export const LoginModal: React.FC = () => {
 														hasArrow
 													>
 														<InputRightElement
-															onClick={() => setShowPassword(!showPassword)}
+															onClick={() =>
+																setShowPassword(!showPassword)
+															}
 														>
 															<IconButton
 																size="sm"
@@ -118,7 +158,9 @@ export const LoginModal: React.FC = () => {
 														</InputRightElement>
 													</Tooltip>
 												</InputGroup>
-												<FormErrorMessage>{errors.password}</FormErrorMessage>
+												<FormErrorMessage>
+													{errors.password}
+												</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
@@ -129,17 +171,14 @@ export const LoginModal: React.FC = () => {
 									w="full"
 									type="submit"
 									variant="primary"
-									// TODO: add login validation
-									// disabled={
-									// 	!isValid ||
-									// 	isSubmitting ||
-									// 	!dirty ||
-									// 	!touched.email ||
-									// 	!touched.password
-									// }
-									onClick={() => navigate(AppRoutes.Board)}
+									disabled={
+										!isValid ||
+										isSubmitting ||
+										!touched.email ||
+										!touched.password
+									}
 								>
-									Login
+									{isSubmitting ? <Spinner /> : "Login"}
 								</Button>
 							</Form>
 
@@ -166,6 +205,9 @@ export const LoginModal: React.FC = () => {
 };
 
 const LoginSchema = Yup.object().shape({
-	[emailFieldName]: Yup.string().email("Invalid email").required("Email is required."),
+	[emailFieldName]: Yup.string()
+		.required()
+		.email("Invalid email.")
+		.required("Email is required."),
 	[passwordFieldName]: Yup.string().required("Password is required."),
 });

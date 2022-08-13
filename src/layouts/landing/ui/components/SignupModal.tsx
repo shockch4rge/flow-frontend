@@ -4,16 +4,37 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import * as Yup from "yup";
 
 import {
-    Button, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Hide, HStack, IconButton,
-    Image, Input, InputGroup, InputRightElement, Link, Modal, ModalBody, ModalCloseButton,
-    ModalContent, ModalHeader, ModalOverlay, Text, Tooltip, VStack
+	Button,
+	Flex,
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
+	Heading,
+	Hide,
+	HStack,
+	IconButton,
+	Image,
+	Input,
+	InputGroup,
+	InputRightElement,
+	Link,
+	Modal,
+	ModalBody,
+	ModalCloseButton,
+	ModalContent,
+	ModalHeader,
+	ModalOverlay,
+	Spinner,
+	Text,
+	Tooltip,
+	VStack,
 } from "@chakra-ui/react";
 
 import { closeModal, openModal } from "../../../../app/slices/ui/modals";
 import { FlowLogo } from "../../../../common-components";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-
+import { useAuthContext } from "../../../../hooks/useAuthContext";
 
 const nameFieldName = "name";
 const usernameFieldName = "username";
@@ -22,6 +43,7 @@ const passwordFieldName = "password";
 
 export const SignupModal: React.FC = () => {
 	const dispatch = useAppDispatch();
+	const { createUser } = useAuthContext();
 	const { open } = useAppSelector(state => state.ui.modals.signup);
 	const [showPassword, setShowPassword] = useState(false);
 
@@ -45,9 +67,12 @@ export const SignupModal: React.FC = () => {
 						email: "",
 						password: "",
 					}}
-					onSubmit={() => {}}
+					onSubmit={values => {
+						createUser(values);
+						close();
+					}}
 				>
-					{({ errors, touched, validateForm, isSubmitting, isValid, dirty, getFieldProps }) => (
+					{({ errors, touched, isSubmitting, isValid, dirty, getFieldProps }) => (
 						<ModalBody>
 							<Heading textAlign="center" size="lg">
 								Create <Hide below="md">a free</Hide> account
@@ -69,21 +94,31 @@ export const SignupModal: React.FC = () => {
 									</Field>
 									<Field name={usernameFieldName}>
 										{(props: any) => (
-											<FormControl isInvalid={!!errors.username && touched.username}>
-												<FormLabel htmlFor={usernameFieldName}>Username</FormLabel>
+											<FormControl
+												isInvalid={!!errors.username && touched.username}
+											>
+												<FormLabel htmlFor={usernameFieldName}>
+													Username
+												</FormLabel>
 												<Input
 													{...getFieldProps(usernameFieldName)}
 													id={usernameFieldName}
 													placeholder="e.g. JohnDoe123"
 												/>
-												<FormErrorMessage>{errors.username}</FormErrorMessage>
+												<FormErrorMessage>
+													{errors.username}
+												</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
 									<Field name={emailFieldName}>
 										{(props: any) => (
-											<FormControl isInvalid={!!errors.email && touched.email}>
-												<FormLabel htmlFor={emailFieldName}>Email</FormLabel>
+											<FormControl
+												isInvalid={!!errors.email && touched.email}
+											>
+												<FormLabel htmlFor={emailFieldName}>
+													Email
+												</FormLabel>
 												<Input
 													{...getFieldProps(emailFieldName)}
 													id={emailFieldName}
@@ -95,8 +130,12 @@ export const SignupModal: React.FC = () => {
 									</Field>
 									<Field name={passwordFieldName}>
 										{(props: any) => (
-											<FormControl isInvalid={!!errors.password && touched.password}>
-												<FormLabel htmlFor={passwordFieldName}>Password</FormLabel>
+											<FormControl
+												isInvalid={!!errors.password && touched.password}
+											>
+												<FormLabel htmlFor={passwordFieldName}>
+													Password
+												</FormLabel>
 												<InputGroup>
 													<Input
 														{...getFieldProps(passwordFieldName)}
@@ -110,8 +149,12 @@ export const SignupModal: React.FC = () => {
 														hasArrow
 													>
 														<InputRightElement
-															cursor={showPassword ? "pointer" : "default"}
-															onClick={() => setShowPassword(!showPassword)}
+															cursor={
+																showPassword ? "pointer" : "default"
+															}
+															onClick={() =>
+																setShowPassword(!showPassword)
+															}
 														>
 															<IconButton
 																size="sm"
@@ -127,13 +170,15 @@ export const SignupModal: React.FC = () => {
 														</InputRightElement>
 													</Tooltip>
 												</InputGroup>
-												<FormErrorMessage>{errors.password}</FormErrorMessage>
+												<FormErrorMessage>
+													{errors.password}
+												</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
 								</VStack>
 								<Text mt="2" fontSize="sm">
-									All fields are required.
+									*All fields are required.
 								</Text>
 
 								<Button
@@ -150,9 +195,8 @@ export const SignupModal: React.FC = () => {
 										!touched.username ||
 										!touched.name
 									}
-									onSubmit={async () => {}}
 								>
-									Create account
+									{isSubmitting ? <Spinner /> : "Create Account"}
 								</Button>
 							</Form>
 
@@ -180,8 +224,12 @@ export const SignupModal: React.FC = () => {
 };
 
 const SignupSchema = Yup.object().shape({
-	name: Yup.string().required("Name is required"),
-	username: Yup.string().required("Username is required"),
-	email: Yup.string().required("Email is required"),
-	password: Yup.string().required("Password is required"),
+	name: Yup.string().required("Name is required."),
+	username: Yup.string()
+		.required("Username is required.")
+		.min(3, "Username must be at least 3 characters."),
+	email: Yup.string().required("Email is required.").email(),
+	password: Yup.string()
+		.required("Password is required.")
+		.min(8, "Password must be at least 8 characters."),
 });
