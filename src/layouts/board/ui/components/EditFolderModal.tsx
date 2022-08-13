@@ -1,5 +1,8 @@
 import {
 	Button,
+	Editable,
+	EditablePreview,
+	EditableTextarea,
 	Flex,
 	FormControl,
 	FormErrorMessage,
@@ -18,6 +21,8 @@ import {
 	Spacer,
 	Spinner,
 	Text,
+	Textarea,
+	useToast,
 	VStack,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
@@ -28,7 +33,6 @@ import * as Yup from "yup";
 import { useDeleteFolderMutation, useEditFolderMutation } from "../../../../app/services/folder";
 import { useCallback } from "react";
 import { FaTrash } from "react-icons/fa";
-import { Toast } from "../../../../common-components/toast";
 
 export const modalName = "editFolder";
 const nameField = "name";
@@ -36,6 +40,7 @@ const descriptionField = "description";
 
 export const EditFolderModal: React.FC<{}> = () => {
 	const dispatch = useAppDispatch();
+	const toast = useToast();
 	const { open, target } = useAppSelector(state => state.ui.modals[modalName]);
 	const [editFolder, { isLoading: isEditingFolder }] = useEditFolderMutation();
 	const [deleteFolder, { isLoading: isDeletingFolder }] = useDeleteFolderMutation();
@@ -52,14 +57,14 @@ export const EditFolderModal: React.FC<{}> = () => {
 		try {
 			await deleteFolder({ id: target.id }).unwrap();
 			close();
-			Toast({
+			toast({
 				description: `${target.name} deleted!`,
-				colorScheme: "green",
+				status: "success",
 			});
 		} catch (e) {
-			Toast({
+			toast({
 				description: "There was an error deleting the folder.",
-				colorScheme: "red",
+				status: "error",
 			});
 		}
 	};
@@ -73,14 +78,14 @@ export const EditFolderModal: React.FC<{}> = () => {
 				name,
 				description,
 			}).unwrap();
-			Toast({
+			toast({
 				description: "Folder updated!",
-				colorScheme: "green",
+				status: "success",
 			});
 		} catch (e) {
-			Toast({
+			toast({
 				description: "There was an error updating the folder.",
-				colorScheme: "red",
+				status: "error",
 			});
 		}
 	};
@@ -104,7 +109,7 @@ export const EditFolderModal: React.FC<{}> = () => {
 				</ModalHeader>
 				<Formik
 					initialValues={{
-						[nameField]: "",
+						[nameField]: target?.name ?? "",
 						[descriptionField]: "",
 					}}
 					validationSchema={EditFolderSchema}
@@ -112,17 +117,10 @@ export const EditFolderModal: React.FC<{}> = () => {
 						handleEditFolder(values[nameField], values[descriptionField])
 					}
 				>
-					{({
-						values,
-						errors,
-						isInitialValid,
-						enableReinitialize = true,
-						getFieldProps,
-						isValid,
-					}) => (
+					{({ values, errors, getFieldProps, isValid }) => (
 						<Form>
-							<ModalBody>
-								<VStack my="6" spacing="6" justify="center">
+							<ModalBody my="4">
+								<VStack spacing="6" justify="center">
 									<Field name={nameField}>
 										{(props: any) => (
 											<FormControl isInvalid={!!errors.name}>
@@ -136,17 +134,17 @@ export const EditFolderModal: React.FC<{}> = () => {
 											</FormControl>
 										)}
 									</Field>
-
 									<Field name={descriptionField}>
 										{(props: any) => (
 											<FormControl isInvalid={!!errors.description}>
 												<FormLabel htmlFor={descriptionField}>
 													Description
 												</FormLabel>
-												<Input
+												<Textarea
 													{...getFieldProps(descriptionField)}
 													id={descriptionField}
-													placeholder="Describe your folder."
+													placeholder={target?.description}
+													resize="none"
 												/>
 												<FormErrorMessage>
 													{errors.description}
@@ -156,9 +154,13 @@ export const EditFolderModal: React.FC<{}> = () => {
 									</Field>
 								</VStack>
 							</ModalBody>
-							<ModalFooter>
+							<ModalFooter gap="4">
+								<Button isDisabled={!isValid || isLoading} onClick={close}>
+									{isLoading ? <Spinner /> : "Cancel"}
+								</Button>
+
 								<Button
-									disabled={isLoading || !isValid || !isInitialValid}
+									disabled={isLoading || !isValid}
 									variant="primary"
 									onClick={() =>
 										handleEditFolder(
