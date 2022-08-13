@@ -6,7 +6,7 @@ interface Props {
 	color?: "dark" | "light";
 }
 
-export const FlowLogo: React.FC<Props> = ({ size, variant, color }) => {
+export const FlowLogo: React.FC<Props> = ({ size, variant = "full", color }) => {
 	const logo = (
 		<Image
 			boxSize={`${size}px`}
