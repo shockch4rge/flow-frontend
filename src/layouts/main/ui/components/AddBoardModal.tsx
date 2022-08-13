@@ -21,12 +21,13 @@ import { closeModal } from "../../../../app/slices/ui/modals";
 import { Toast } from "../../../../common-components/toast";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-import { MOCK_USER_ID } from "../../../../utils/mockData";
+import { useAuthContext } from "../../../../hooks/useAuthContext";
 
 export const AddBoardModal: React.FC = () => {
 	const dispatch = useAppDispatch();
-	const { open } = useAppSelector(state => state.ui.modals["addBoard"]);
+	const { user } = useAuthContext();
 	const [name, setName] = useState("");
+	const { open } = useAppSelector(state => state.ui.modals["addBoard"]);
 	const [addBoard, { isLoading: isAddingBoard }] = useAddBoardMutation();
 
 	const close = () => {
@@ -36,7 +37,7 @@ export const AddBoardModal: React.FC = () => {
 	const handleAddBoard = async () => {
 		try {
 			const board = await addBoard({
-				authorId: MOCK_USER_ID,
+				authorId: user!.id,
 				name,
 			}).unwrap();
 			dispatch(setCurrentBoard(board));
