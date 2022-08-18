@@ -7,6 +7,10 @@ export const ApiTags = {
 	Boards: "Boards",
 	Folders: "Folders",
 	Cards: "Cards",
+	Checklists: "Checklists",
+	Notepads: "Notepads",
+	Comments: "Comments",
+	Tags: "Tags",
 };
 
 const api = createApi({
@@ -28,7 +32,16 @@ const api = createApi({
 	}),
 	// compose endpoints later
 	endpoints: () => ({}),
-	tagTypes: [...cacheUtils.defaultTags, ApiTags.Boards, ApiTags.Folders, ApiTags.Cards],
+	tagTypes: [
+		...cacheUtils.defaultTags,
+		ApiTags.Boards,
+		ApiTags.Folders,
+		ApiTags.Cards,
+		ApiTags.Checklists,
+		ApiTags.Notepads,
+		ApiTags.Comments,
+		ApiTags.Tags,
+	],
 });
 
 export default api;
