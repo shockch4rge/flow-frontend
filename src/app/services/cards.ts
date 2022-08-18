@@ -27,7 +27,10 @@ const cardService = api.injectEndpoints({
 				const patchResult = dispatch(
 					cardService.util.updateQueryData("getFolderCards", folderId, cards => {
 						cards.push({
-							components: [],
+							checklists: [],
+							notepads: [],
+							tags: [],
+							dueDate: undefined,
 							description: "",
 							folderId,
 							name,
