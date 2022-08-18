@@ -1,7 +1,8 @@
-import { iComponent } from "./";
-
+import { iComponent } from ".";
 
 export interface iChecklist extends iComponent {
+	name: string;
+	description: string;
 	items: iChecklistItem[];
 }
 
@@ -10,5 +11,4 @@ export interface iChecklistItem {
 	checklistId: string;
 	name: string;
 	checked: boolean;
-	dueDate?: Date;
 }
