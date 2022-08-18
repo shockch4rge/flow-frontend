@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 import { iUser } from "../../utils/models";
 import authService from "../services/auth";
 
@@ -19,6 +20,10 @@ const authSlice = createSlice({
 	extraReducers: builder => {
 		builder
 			.addMatcher(authService.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
+				if (payload.status.result === "error") {
+					return;
+				}
+
 				localStorage.setItem("token", payload.authorization.token);
 				state.token = localStorage.getItem("token")!;
 				state.user = payload.user;
