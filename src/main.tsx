@@ -8,20 +8,20 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
 
 import App from "./App";
+import { AuthProvider } from "./app/context/AuthContext";
 import store from "./app/store";
 import theme from "./utils/theme";
-import { AuthProvider } from "./app/context/AuthContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-	<React.StrictMode>
-		<Provider store={store}>
-			<ChakraProvider theme={theme}>
-				<Router>
-					<AuthProvider>
-						<App />
-					</AuthProvider>
-				</Router>
-			</ChakraProvider>
-		</Provider>
-	</React.StrictMode>
+    // <React.StrictMode>
+    <Provider store={store}>
+        <ChakraProvider theme={theme}>
+            <Router>
+                <AuthProvider>
+                    <App />
+                </AuthProvider>
+            </Router>
+        </ChakraProvider>
+    </Provider>
+    // </React.StrictMode>
 );
