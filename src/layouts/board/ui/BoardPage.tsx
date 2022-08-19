@@ -1,9 +1,11 @@
+import { Field, Form, Formik } from "formik";
 import { useCallback, useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
 import { FaBars, FaBox, FaCog, FaCogs, FaFolderPlus, FaHamburger } from "react-icons/fa";
+import * as Yup from "yup";
 
 import {
-    Box, Button, Center, Editable, EditableInput, EditablePreview, Flex, Heading, HStack,
+    Box, Button, Center, Flex, FormControl, FormErrorMessage, FormLabel, Heading, HStack,
     IconButton, Input, Spacer, Spinner, Text, Tooltip, useToast, VStack
 } from "@chakra-ui/react";
 
@@ -170,21 +172,40 @@ export const BoardPage: React.FC<{}> = props => {
                             <Box pt="4">
                                 <Box w="64" p="2" bgColor="gray.200" borderRadius={6}>
                                     {isAddingFolderMode && (
-                                        <Editable
-                                            w="100%"
-                                            mb="2"
-                                            defaultValue="New folder"
-                                            isPreviewFocusable
-                                            selectAllOnFocus
-                                            startWithEditView
-                                            onSubmit={handleAddFolder}
+                                        <Formik
+                                            validationSchema={AddFolderSchema}
+                                            onSubmit={({ name }) => handleAddFolder(name)}
+                                            initialValues={{
+                                                name: "New Folder",
+                                            }}
                                         >
-                                            <EditablePreview w="100%" py={2} px={2} bg="gray.50" />
-                                            <Input py={2} px={4} as={EditableInput} />
-                                        </Editable>
+                                            {({ values, errors, touched, getFieldProps }) => (
+                                                <Form>
+                                                    <Field name="name">
+                                                        {(props: any) => (
+                                                            <FormControl
+                                                                isInvalid={
+                                                                    !!errors.name && touched.name
+                                                                }
+                                                            >
+                                                                <Input
+                                                                    {...getFieldProps("name")}
+                                                                    id={"name"}
+                                                                    placeholder="e.g. johndoe@gmail.com"
+                                                                    bgColor="white"
+                                                                />
+                                                                <FormErrorMessage>
+                                                                    {errors.name}
+                                                                </FormErrorMessage>
+                                                            </FormControl>
+                                                        )}
+                                                    </Field>
+                                                </Form>
+                                            )}
+                                        </Formik>
                                     )}
                                     <Button
-                                        w="100%"
+                                        w="full"
                                         bg="transparent"
                                         _hover={{ bgColor: "gray.100" }}
                                         _active={{ bgColor: "gray.50" }}
@@ -208,3 +229,7 @@ export const BoardPage: React.FC<{}> = props => {
         </DragDropContext>
     );
 };
+
+const AddFolderSchema = Yup.object().shape({
+    name: Yup.string().required("Folder name cannot be empty!"),
+});
