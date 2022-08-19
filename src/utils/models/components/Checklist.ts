@@ -1,4 +1,4 @@
-import { iComponent } from ".";
+import { iComponent } from "..";
 
 export interface iChecklist extends iComponent {
 	name: string;
