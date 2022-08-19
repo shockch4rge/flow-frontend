@@ -1,45 +1,48 @@
 import { useEffect, useState } from "react";
-import { Outlet, useOutletContext } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 import { Box, Center, Heading, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 
-import { useGetUserBoardsQuery } from "../../../app/services/boards";
-import { setCurrentBoard } from "../../../app/slices/board";
+import { useGetUserBoardsQuery, useLazyGetUserBoardsQuery } from "../../../app/services/boards";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
-import { useAppSelector } from "../../../hooks/useAppSelector";
-import { MainSidebar } from "./components/MainSidebar";
-import { iBoard } from "../../../utils/models";
-import { AddBoardModal } from "./components/AddBoardModal";
 import { useAuthContext } from "../../../hooks/useAuthContext";
-import { useGetCurrentUserQuery } from "../../../app/services/auth";
+import { AddBoardModal } from "./components/AddBoardModal";
+import { MainSidebar } from "./components/MainSidebar";
 
 export const MainView: React.FC = () => {
-	const dispatch = useAppDispatch();
-	const { user } = useAuthContext();
-	const { data: boards, isLoading: isLoadingBoards } = useGetUserBoardsQuery(user!.id);
+    const dispatch = useAppDispatch();
+    const { user } = useAuthContext();
+    const [getUserBoards, { data: boards, isLoading: isLoadingBoards }] =
+        useLazyGetUserBoardsQuery();
 
-	return (
-		<Box>
-			<HStack h="100vh" overflow="hidden" spacing="0">
-				<MainSidebar boards={boards} />
-				{isLoadingBoards ? (
-					<LoadingBoardsIndicator isLoading={isLoadingBoards} />
-				) : (
-					<Outlet />
-				)}
-			</HStack>
-			<AddBoardModal />
-		</Box>
-	);
+    useEffect(() => {
+        if (!user) return;
+
+        getUserBoards(user.id).unwrap();
+    }, [user]);
+
+    return (
+        <Box>
+            {isLoadingBoards || !boards ? (
+                <LoadingBoardsIndicator />
+            ) : (
+                <HStack h="100vh" overflow="hidden" spacing="0">
+                    <MainSidebar boards={boards} />
+                    <Outlet />
+                </HStack>
+            )}
+            <AddBoardModal />
+        </Box>
+    );
 };
 
-const LoadingBoardsIndicator: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
-	return (
-		<Center w="full">
-			<VStack>
-				<Spinner />
-				<Heading>Loading your boards...</Heading>
-			</VStack>
-		</Center>
-	);
+const LoadingBoardsIndicator: React.FC<{}> = () => {
+    return (
+        <Center h="full">
+            <VStack>
+                <Spinner />
+                <Heading>Loading your boards...</Heading>
+            </VStack>
+        </Center>
+    );
 };
