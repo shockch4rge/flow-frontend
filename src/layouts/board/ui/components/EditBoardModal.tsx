@@ -1,39 +1,19 @@
-import {
-	Button,
-	Editable,
-	EditableInput,
-	EditablePreview,
-	EditableTextarea,
-	Flex,
-	FormControl,
-	FormErrorMessage,
-	FormLabel,
-	Heading,
-	IconButton,
-	Input,
-	Modal,
-	ModalBody,
-	ModalCloseButton,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-	ModalOverlay,
-	Spacer,
-	Spinner,
-	Textarea,
-	Tooltip,
-	useColorModeValue,
-	useToast,
-	VStack,
-} from "@chakra-ui/react";
-import { Formik, Form, Field } from "formik";
+import { Field, Form, Formik } from "formik";
 import { useCallback } from "react";
 import { FaTrash } from "react-icons/fa";
+import * as Yup from "yup";
+
+import {
+    Button, Editable, EditableInput, EditablePreview, EditableTextarea, Flex, FormControl,
+    FormErrorMessage, FormLabel, Heading, IconButton, Input, Modal, ModalBody, ModalCloseButton,
+    ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spacer, Spinner, Textarea, Tooltip,
+    useColorModeValue, useToast, VStack
+} from "@chakra-ui/react";
+
 import { useDeleteBoardMutation, useEditBoardMutation } from "../../../../app/services/boards";
 import { closeModal } from "../../../../app/slices/ui/modals";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-import * as Yup from "yup";
 
 const nameField = "name";
 const descriptionField = "description";
@@ -84,7 +64,7 @@ export const EditBoardModal: React.FC<{}> = () => {
 			});
 		} catch (e) {
 			toast({
-				description: "There was an error updating the board.",
+				description: "There was an error updating the board. Please try again.",
 				status: "error",
 			});
 		}

@@ -1,38 +1,18 @@
-import {
-	Button,
-	Editable,
-	EditablePreview,
-	EditableTextarea,
-	Flex,
-	FormControl,
-	FormErrorMessage,
-	FormLabel,
-	Heading,
-	HStack,
-	IconButton,
-	Input,
-	Modal,
-	ModalBody,
-	ModalCloseButton,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-	ModalOverlay,
-	Spacer,
-	Spinner,
-	Text,
-	Textarea,
-	useToast,
-	VStack,
-} from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import { useCallback } from "react";
+import { FaTrash } from "react-icons/fa";
+import * as Yup from "yup";
+
+import {
+    Button, Editable, EditablePreview, EditableTextarea, Flex, FormControl, FormErrorMessage,
+    FormLabel, Heading, HStack, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent,
+    ModalFooter, ModalHeader, ModalOverlay, Spacer, Spinner, Text, Textarea, useToast, VStack
+} from "@chakra-ui/react";
+
+import { useDeleteFolderMutation, useEditFolderMutation } from "../../../../app/services/folder";
 import { closeModal } from "../../../../app/slices/ui/modals";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-import * as Yup from "yup";
-import { useDeleteFolderMutation, useEditFolderMutation } from "../../../../app/services/folder";
-import { useCallback } from "react";
-import { FaTrash } from "react-icons/fa";
 
 export const modalName = "editFolder";
 const nameField = "name";
@@ -75,16 +55,18 @@ export const EditFolderModal: React.FC<{}> = () => {
 		try {
 			await editFolder({
 				id: target.id,
+				boardId: target.boardId,
 				name,
 				description,
 			}).unwrap();
+			close();
 			toast({
 				description: "Folder updated!",
 				status: "success",
 			});
 		} catch (e) {
 			toast({
-				description: "There was an error updating the folder.",
+				description: "There was an error updating the folder. Please try again",
 				status: "error",
 			});
 		}

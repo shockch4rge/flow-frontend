@@ -23,6 +23,7 @@ import { iChecklist } from "../../../../utils/models";
 const modalName = "editCard";
 
 export const EditCardModal: React.FC = () => {
+    const toast = useToast();
     const dispatch = useAppDispatch();
     const { open, target } = useAppSelector(state => state.ui.modals[modalName]);
     const [deleteCard, { isLoading: isDeletingCard, isSuccess: hasDeletedCard }] =
@@ -43,7 +44,19 @@ export const EditCardModal: React.FC = () => {
     const handleDeleteCard = async () => {
         if (!target) return;
 
-        await deleteCard(target.id);
+        try {
+            await deleteCard(target.id).unwrap();
+            close();
+            toast({
+                description: `${target.name} deleted!`,
+                status: "success",
+            });
+        } catch (e) {
+            toast({
+                description: "There was an error deleting the card. Please try again.",
+                status: "error",
+            });
+        }
 
         close();
     };
