@@ -110,7 +110,7 @@ export const {
     useUpdateUserMutation,
     useResetPasswordMutation,
     useDeleteUserMutation,
-    useGetCurrentUserQuery,
+    useLazyGetCurrentUserQuery,
     useLazyRefreshAuthQuery,
 } = authService;
 

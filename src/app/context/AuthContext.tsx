@@ -15,6 +15,7 @@ import {
 
 type AuthContextState = {
     user: iUser | null;
+    token: string | null;
     loginUser: (params: MutationParams<typeof useLoginUserMutation>) => Promise<void>;
     deleteUser: (params: MutationParams<typeof useDeleteUserMutation>) => Promise<void>;
     signOutUser: (params: MutationParams<typeof useSignOutUserMutation>) => Promise<void>;
@@ -35,7 +36,7 @@ export const AuthContext = createContext<AuthContextState | null>(null);
 export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     const toast = useToast();
     const navigate = useNavigate();
-    const [login, {}] = useLoginUserMutation();
+    const [login] = useLoginUserMutation();
     const [signOut] = useSignOutUserMutation();
     const [create] = useCreateUserMutation();
     const [_delete] = useDeleteUserMutation();
@@ -165,6 +166,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
         <AuthContext.Provider
             value={{
                 user,
+                token,
                 loginUser,
                 signOutUser,
                 createUser,
