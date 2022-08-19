@@ -1,10 +1,5 @@
 import {
-	ComponentStyleConfig,
-	extendTheme,
-	theme as baseTheme,
-	ThemeConfig,
-	ThemeTypings,
-	withDefaultColorScheme,
+    ComponentStyleConfig, extendTheme, theme as baseTheme, ThemeConfig
 } from "@chakra-ui/react";
 import { StyleFunctionProps } from "@chakra-ui/theme-tools";
 
@@ -43,9 +38,19 @@ const extendedTheme = {
 					_hover: {
 						bg: "green.400",
 						textColor: "white",
+						_disabled: {
+							bg: "green.300",
+							fontWeight: "light",
+							textColor: "white",
+						},
 					},
 					_active: {
 						bg: "green.400",
+					},
+					_disabled: {
+						bg: "green.300",
+						fontWeight: "light",
+						textColor: "white",
 					},
 				}),
 
