@@ -38,7 +38,7 @@ export const MainView: React.FC = () => {
 
 const LoadingBoardsIndicator: React.FC<{}> = () => {
     return (
-        <Center h="full">
+        <Center h="100vh">
             <VStack>
                 <Spinner />
                 <Heading>Loading your boards...</Heading>
