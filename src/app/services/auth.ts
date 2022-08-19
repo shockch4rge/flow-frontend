@@ -4,110 +4,114 @@ import api from "./api";
 type JwtToken = { token: string };
 
 type AuthorizedResponse = {
-	status: {
-		result: string;
-		message: string;
-	};
-	user: iUser;
-	authorization: JwtToken & { type: string };
+    status: {
+        result: string;
+        message: string;
+    };
+    user: iUser;
+    authorization: JwtToken & { type: string };
 };
 
 const authService = api.injectEndpoints({
-	overrideExisting: false,
+    overrideExisting: false,
 
-	endpoints: builder => ({
-		getCurrentUser: builder.query<{ status: {}, user: iUser }, void>({
-			query: () => ({
-				url: "/auth/me",
-				method: "GET",
-			}),
-		}),
-		
-		getUser: builder.query<iUser, iUser["id"]>({
-			query: userId => ({
-				url: `/auth/${userId}`,
-				method: "GET",
-			}),
-		}),
+    endpoints: builder => ({
+        getCurrentUser: builder.query<{ status: {}; user: iUser }, void>({
+            query: () => ({
+                url: "/auth/me",
+                method: "GET",
+            }),
+        }),
 
-		loginUser: builder.mutation<
-			AuthorizedResponse,
-			Pick<iUser, "email"> & { password: string }
-		>({
-			query: ({ email, password }) => ({
-				url: `/auth/login`,
-				method: "POST",
-				body: { email, password },
-			}),
-		}),
+        getUser: builder.query<iUser, iUser["id"]>({
+            query: userId => ({
+                url: `/auth/${userId}`,
+                method: "GET",
+            }),
+        }),
 
-		signOutUser: builder.mutation<void, void>({
-			query: () => ({
-				url: "/auth/logout",
-				method: "POST",
-			}),
-		}),
+        loginUser: builder.mutation<
+            AuthorizedResponse,
+            Pick<iUser, "email"> & { password: string }
+        >({
+            query: ({ email, password }) => ({
+                url: `/auth/login`,
+                method: "POST",
+                body: { email, password },
+            }),
+        }),
 
-		createUser: builder.mutation<
-			AuthorizedResponse,
-			Pick<iUser, "name" | "email" | "username"> & { password: string }
-		>({
-			query: ({ email, name, password, username }) => ({
-				url: `/auth/register`,
-				method: "POST",
-				body: {
-					name,
-					username,
-					email,
-					password,
-				},
-			}),
-		}),
+        signOutUser: builder.mutation<void, void>({
+            query: () => ({
+                url: "/auth/logout",
+                method: "POST",
+            }),
+        }),
 
-		updateUser: builder.mutation<
-			iUser,
-			Pick<iUser, "id"> & Partial<Pick<iUser, "username" | "email" | "name">>
-		>({
-			query: user => ({
-				url: `/auth/${user.id}`,
-				method: "PUT",
-				body: user,
-			}),
-		}),
+        createUser: builder.mutation<
+            AuthorizedResponse,
+            Pick<iUser, "name" | "email" | "username"> & { password: string }
+        >({
+            query: ({ email, name, password, username }) => ({
+                url: `/auth/register`,
+                method: "POST",
+                body: {
+                    name,
+                    username,
+                    email,
+                    password,
+                },
+            }),
+        }),
 
-		resetPassword: builder.mutation<void, Pick<iUser, "email">>({
-			query: ({ email }) => ({
-				url: `/auth/reset-password`,
-				method: "POST",
-				body: { email },
-			}),
-		}),
+        updateUser: builder.mutation<
+            iUser,
+            Pick<iUser, "id"> & Partial<Pick<iUser, "username" | "email" | "name">>
+        >({
+            query: ({id, email, username, name}) => ({
+                url: `/auth/${id}`,
+                method: "PUT",
+                body: {
+                    email,
+                    username,
+                    name,
+                },
+            }),
+        }),
 
-		deleteUser: builder.mutation<void, void>({
-			query: () => ({
-				url: `/auth/destroy`,
-				method: "DELETE",
-			}),
-		}),
+        resetPassword: builder.mutation<void, { oldPassword: string; newPassword: string }>({
+            query: ({ oldPassword, newPassword }) => ({
+                url: `/auth/reset-password`,
+                method: "POST",
+                body: { oldPassword, newPassword },
+            }),
+        }),
 
-		refreshAuth: builder.query<AuthorizedResponse, void>({
-			query: () => ({
-				url: `/auth/refresh`,
-				method: "GET",
-			}),
-		}),
-	}),
+        deleteUser: builder.mutation<void, void>({
+            query: () => ({
+                url: `/auth/destroy`,
+                method: "DELETE",
+            }),
+        }),
+
+        refreshAuth: builder.query<AuthorizedResponse, void>({
+            query: () => ({
+                url: `/auth/refresh`,
+                method: "GET",
+            }),
+        }),
+    }),
 });
 
 export const {
-	useLoginUserMutation,
-	useCreateUserMutation,
-	useSignOutUserMutation,
-	useUpdateUserMutation,
-	useResetPasswordMutation,
-	useDeleteUserMutation,
-	useGetCurrentUserQuery,
-	useLazyRefreshAuthQuery
+    useLoginUserMutation,
+    useCreateUserMutation,
+    useSignOutUserMutation,
+    useUpdateUserMutation,
+    useResetPasswordMutation,
+    useDeleteUserMutation,
+    useGetCurrentUserQuery,
+    useLazyRefreshAuthQuery,
 } = authService;
 
 export default authService;
