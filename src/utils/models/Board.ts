@@ -1,3 +1,5 @@
+import { iTag } from "./components/Tag";
+
 export interface iBoard {
 	id: string;
 	name: string;
@@ -5,4 +7,5 @@ export interface iBoard {
 	authorId: string;
 	createdAt: string;
 	updatedAt: string;
+	tags: iTag[];
 }
