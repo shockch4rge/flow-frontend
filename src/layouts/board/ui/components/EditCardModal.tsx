@@ -1,3 +1,5 @@
+import { Select } from "chakra-react-select";
+import moment from "moment";
 import { useMemo, useRef, useState } from "react";
 import {
     FaCheck, FaCheckSquare, FaCross, FaPlus, FaStickyNote, FaTimes, FaTrash, FaXing
@@ -14,11 +16,11 @@ import {
 
 import { useDeleteCardMutation, useEditCardMutation } from "../../../../app/services/cards";
 import { useAddChecklistMutation } from "../../../../app/services/checklists";
-import { useAddNotepadMutation } from "../../../../app/services/notepads";
+import { useAddNotepadMutation, useDeleteNotepadMutation } from "../../../../app/services/notepads";
 import { closeModal } from "../../../../app/slices/ui/modals";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-import { iChecklist } from "../../../../utils/models";
+import { iCard, iChecklist, iNotepad } from "../../../../utils/models";
 
 const modalName = "editCard";
 
@@ -26,6 +28,7 @@ export const EditCardModal: React.FC = () => {
     const toast = useToast();
     const dispatch = useAppDispatch();
     const { open, target } = useAppSelector(state => state.ui.modals[modalName]);
+    const [editCard, { isLoading: isEditing }] = useEditCardMutation();
     const [deleteCard, { isLoading: isDeletingCard, isSuccess: hasDeletedCard }] =
         useDeleteCardMutation();
     const [isAddingTagMode, setIsAddingTagMode] = useState(false);
@@ -39,6 +42,23 @@ export const EditCardModal: React.FC = () => {
         }
 
         setIsAddingTagMode(false);
+    };
+
+    const handleEditName = async (name: string) => {
+        if (!target) return;
+
+        try {
+            await editCard({
+                id: target.id,
+                folderId: target.folderId,
+                name,
+            }).unwrap();
+        } catch (e) {
+            toast({
+                description: "Could not edit name. Please try again.",
+                status: "error",
+            });
+        }
     };
 
     const handleDeleteCard = async () => {
@@ -57,8 +77,6 @@ export const EditCardModal: React.FC = () => {
                 status: "error",
             });
         }
-
-        close();
     };
 
     if (!target) return <></>;
@@ -77,10 +95,12 @@ export const EditCardModal: React.FC = () => {
                     <Tooltip label="Click to edit" hasArrow openDelay={1000}>
                         <Editable
                             flex="1"
-                            defaultValue={target?.name}
+                            defaultValue={target.name}
                             borderRadius="6"
                             isPreviewFocusable
                             selectAllOnFocus
+                            submitOnBlur={false}
+                            onSubmit={handleEditName}
                             _hover={{
                                 bg: "gray.50",
                             }}
@@ -90,7 +110,7 @@ export const EditCardModal: React.FC = () => {
                         </Editable>
                     </Tooltip>
                     <IconButton aria-label="Delete card" onClick={handleDeleteCard}>
-                        {isDeletingCard || hasDeletedCard ? <Spinner /> : <FaTrash />}
+                        {isDeletingCard ? <Spinner /> : <FaTrash />}
                     </IconButton>
                 </ModalHeader>
 
@@ -99,53 +119,7 @@ export const EditCardModal: React.FC = () => {
                         <VStack mr="6" p="4" flex="3" align="stretch" spacing="12">
                             <Box>
                                 <Heading size="md">Tags</Heading>
-                                <Wrap mt="4">
-                                    <WrapItem>
-                                        <Tag bg="blue.300" textColor="white">
-                                            Tech
-                                            <TagCloseButton color="white" />
-                                        </Tag>
-                                    </WrapItem>
-                                    {isAddingTagMode && (
-                                        <WrapItem>
-                                            <Editable
-                                                fontSize={"sm"}
-                                                defaultValue="New tag"
-                                                isPreviewFocusable={true}
-                                                selectAllOnFocus={true}
-                                                startWithEditView={true}
-                                                onSubmit={handleAddTag}
-                                            >
-                                                <EditablePreview
-                                                    py={1}
-                                                    px={1}
-                                                    bg="gray.50"
-                                                    _hover={{
-                                                        bg: "gray.100",
-                                                    }}
-                                                />
-                                                <Input py={2} px={4} as={EditableInput} />
-                                            </Editable>
-                                        </WrapItem>
-                                    )}
-                                    <WrapItem>
-                                        {isAddingTagMode ? (
-                                            <IconButton
-                                                size="xs"
-                                                aria-label="Cancel"
-                                                icon={<FaTimes opacity="50%" />}
-                                                onClick={() => setIsAddingTagMode(false)}
-                                            />
-                                        ) : (
-                                            <IconButton
-                                                size="xs"
-                                                aria-label="Add tag"
-                                                icon={<FaPlus opacity="50%" />}
-                                                onClick={() => setIsAddingTagMode(true)}
-                                            />
-                                        )}
-                                    </WrapItem>
-                                </Wrap>
+                                <TagBuilder cardId={target.id} />
                             </Box>
 
                             <Box>
@@ -154,9 +128,9 @@ export const EditCardModal: React.FC = () => {
                                     mt="3"
                                     noOfLines={3}
                                     defaultValue={
-                                        target?.description === ""
+                                        target.description === ""
                                             ? "No description provided."
-                                            : target?.description
+                                            : target.description
                                     }
                                 >
                                     <EditablePreview />
@@ -164,29 +138,12 @@ export const EditCardModal: React.FC = () => {
                                 </Editable>
                             </Box>
 
-                            {target.checklists.length > 0 && (
-                                <Box>
-                                    <Heading size="md">Checklists</Heading>
-                                    <VStack spacing="4">
-                                        {target.checklists.map((checklist: iChecklist) => (
-                                            <VStack>
-                                                <Heading size="md">{checklist.name}</Heading>
-                                                <VStack>
-                                                    {checklist.items.map(item => (
-                                                        <Checkbox defaultChecked={item.checked}>
-                                                            {item.name}
-                                                        </Checkbox>
-                                                    ))}
-                                                </VStack>
-                                            </VStack>
-                                        ))}
-                                    </VStack>
-                                </Box>
-                            )}
+                            {target.checklists.length > 0 && <ChecklistBuilder card={target} />}
+                            {target.notepads.length > 0 && <NotepadBuilder card={target} />}
+
                             <VStack align="start" spacing="4">
                                 <Heading size="md">Comments</Heading>
-                                {target.comments.length <= 0 && <Text>There are no comments!</Text>}
-                                <CommentBuilder />
+                                {target.comments.length > 0 && <CommentBuilder card={target} />}
                             </VStack>
                         </VStack>
 
@@ -201,12 +158,12 @@ export const EditCardModal: React.FC = () => {
                                     bgColor="gray.100"
                                     align="center"
                                 >
-                                    <ChecklistBuilder cardId={target!.id} />
-                                    <NotepadBuilder />
+                                    <ChecklistButton cardId={target.id} />
+                                    <NotepadButton cardId={target.id} />
                                 </VStack>
                             </VStack>
                             <Spacer />
-                            <DueDateBuilder />
+                            <DueDateBuilder card={target} />
                         </Flex>
                     </Flex>
                 </ModalBody>
@@ -230,13 +187,14 @@ export const EditCardModal: React.FC = () => {
     );
 };
 
-const DueDateBuilder: React.FC<{}> = () => {
+const DueDateBuilder: React.FC<{ card: iCard }> = ({ card }) => {
     const initialFocusRef = useRef(null);
     const { isOpen, onClose, onToggle } = useDisclosure();
+    const [dueDate, setDueDate] = useState(card.dueDate);
     const [editCard, { isLoading: isEditing }] = useEditCardMutation();
 
     const handleEdit = async (e: any) => {
-        console.log(e);
+        console.log(e.target.value);
 
         // await editCard({
 
@@ -263,13 +221,16 @@ const DueDateBuilder: React.FC<{}> = () => {
                         ref={initialFocusRef}
                         type="datetime-local"
                         defaultValue={(() => {
-                            // const date = new Date();
-                            // return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+                            // const dueDate = card.dueDate;
+                            // if (!dueDate) return undefined;
 
-                            var curr = new Date();
-                            curr.setDate(curr.getDate() + 3);
-                            return curr.toISOString().substring(0, 10);
+                            const date = new Date();
+
+                            const string = moment(date).format("YYYY-MM-DDThh:mm:ss");
+
+                            return string;
                         })()}
+                        onChange={(e: any) => console.log(e.target.value)}
                     />
                 </PopoverBody>
                 <PopoverFooter gap="4" border="0" display="flex" justifyContent="end">
@@ -291,15 +252,25 @@ const DueDateBuilder: React.FC<{}> = () => {
     );
 };
 
-const CommentBuilder: React.FC<{}> = () => {
+const CommentBuilder: React.FC<{ card: iCard }> = ({ card }) => {
     const [comment, setComment] = useState("");
 
     return (
-        <Input placeholder="Add a comment...." onChange={(e: any) => setComment(e.target.value)} />
+        <VStack>
+            {card.comments.map(comment => (
+                <VStack spacing="4">
+                    <Text fontSize="sm">{comment.content}</Text>
+                </VStack>
+            ))}
+            <Input
+                placeholder="Add a comment...."
+                onChange={(e: any) => setComment(e.target.value)}
+            />
+        </VStack>
     );
 };
 
-const ChecklistBuilder: React.FC<Pick<iChecklist, "cardId">> = ({ cardId }) => {
+const ChecklistButton: React.FC<Pick<iChecklist, "cardId">> = ({ cardId }) => {
     const toast = useToast();
     const [name, setName] = useState("");
     const initialFocusRef = useRef(null);
@@ -388,11 +359,31 @@ const ChecklistBuilder: React.FC<Pick<iChecklist, "cardId">> = ({ cardId }) => {
     );
 };
 
-const ChecklistItemBuilder: React.FC = () => {
+const ChecklistBuilder: React.FC<{ card: iCard }> = ({ card }) => {
+    return (
+        <Box>
+            <Heading size="md">Checklists</Heading>
+            <VStack spacing="4">
+                {card.checklists.map(checklist => (
+                    <VStack>
+                        <Heading size="md">{checklist.name}</Heading>
+                        <VStack>
+                            {checklist.items.map(item => (
+                                <Checkbox defaultChecked={item.checked}>{item.name}</Checkbox>
+                            ))}
+                        </VStack>
+                    </VStack>
+                ))}
+            </VStack>
+        </Box>
+    );
+};
+
+const ChecklistItemBuilder: React.FC<Pick<iChecklist, "cardId">> = ({ cardId }) => {
     return <></>;
 };
 
-const NotepadBuilder: React.FC<{}> = () => {
+const NotepadButton: React.FC<Pick<iNotepad, "cardId">> = ({ cardId }) => {
     const toast = useToast();
     const [content, setContent] = useState("");
     const [addNotepad, { isLoading: isAdding }] = useAddNotepadMutation();
@@ -402,14 +393,18 @@ const NotepadBuilder: React.FC<{}> = () => {
     const handleAdd = async () => {
         if (content === "") {
             toast({
-                description: "Notepad content must not be empty.",
+                description: "Notepad content must not be empty!",
                 status: "error",
             });
         }
 
         try {
-            await addNotepad({ content }).unwrap();
+            await addNotepad({ cardId, content }).unwrap();
             onClose();
+            toast({
+                description: "Notepad added.",
+                status: "success",
+            });
         } catch (e) {
             console.warn(e);
             toast({
@@ -467,6 +462,78 @@ const NotepadBuilder: React.FC<{}> = () => {
     );
 };
 
+const NotepadBuilder: React.FC<{ card: iCard }> = ({ card }) => {
+    const toast = useToast();
+    const [deleteNotepad] = useDeleteNotepadMutation();
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteNotepad({ cardId: card.id, id }).unwrap();
+            toast({
+                description: "Notepad deleted.",
+                status: "success",
+            });
+        } catch (e) {
+            toast({
+                description: "There was an error deleting the notepad.",
+                status: "error",
+            });
+            console.warn(e);
+        }
+    };
+
+    return (
+        <VStack align="start" spacing="4" w="full">
+            <Heading size="md">Notepads</Heading>
+            <VStack spacing="2" w="inherit">
+                {card.notepads.map(notepad => (
+                    <Flex w="inherit" p="2" borderRadius="md" borderWidth="thin">
+                        <Text>{notepad.content}</Text>
+                        <Spacer />
+                        <IconButton
+                            aria-label="Delete notepad"
+                            onClick={() => handleDelete(notepad.id)}
+                        >
+                            <FaTrash />
+                        </IconButton>
+                    </Flex>
+                ))}
+            </VStack>
+        </VStack>
+    );
+};
+
 const TagBuilder: React.FC<{ cardId: string }> = ({ cardId }) => {
-    return <></>;
+    const currentBoard = useAppSelector(state => state.boards.current);
+
+    const options = [
+        {
+            value: "COMT",
+            label: "COMT",
+        },
+        {
+            value: "UXID",
+            label: "UXID",
+        },
+        {
+            value: "NETY",
+            label: "NETY",
+        },
+    ];
+
+    if (!currentBoard) return <></>;
+
+    return (
+        <Box mt="4">
+            <Select
+                size="md"
+                options={currentBoard.tags.map(tag => ({
+                    value: tag.name,
+                    label: tag.name,
+                }))}
+                isMulti
+                backspaceRemovesValue
+            />
+        </Box>
+    );
 };
