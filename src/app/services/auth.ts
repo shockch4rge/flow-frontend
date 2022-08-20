@@ -69,7 +69,7 @@ const authService = api.injectEndpoints({
             Pick<iUser, "id"> & Partial<Pick<iUser, "username" | "email" | "name">>
         >({
             query: ({id, email, username, name}) => ({
-                url: `/auth/${id}`,
+                url: `/auth/update/${id}`,
                 method: "PUT",
                 body: {
                     email,

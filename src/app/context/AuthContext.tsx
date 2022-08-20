@@ -9,8 +9,8 @@ import { useAppSelector } from "../../hooks/useAppSelector";
 import { iUser } from "../../utils/models";
 import { AppRoutes } from "../../utils/routes";
 import {
-    useCreateUserMutation, useDeleteUserMutation, useGetCurrentUserQuery, useLazyRefreshAuthQuery,
-    useLoginUserMutation, useResetPasswordMutation, useSignOutUserMutation, useUpdateUserMutation
+    useCreateUserMutation, useDeleteUserMutation, useLazyRefreshAuthQuery, useLoginUserMutation,
+    useResetPasswordMutation, useSignOutUserMutation, useUpdateUserMutation
 } from "../services/auth";
 
 type AuthContextState = {
@@ -43,9 +43,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     const [update] = useUpdateUserMutation();
     const [resetPassword] = useResetPasswordMutation();
     const { user, token } = useAppSelector(state => state.auth);
-    // const [refreshAuth] = useLazyRefreshAuthQuery({
-    // 	pollingInterval: 1000 * 60 * 5, // 5 minutes
-    // });
+    const [refreshAuth] = useLazyRefreshAuthQuery();
 
     useEffect(() => {
         if (!token || !user) {
@@ -129,6 +127,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     const updateUser = async (params: MutationParams<typeof useUpdateUserMutation>) => {
         try {
             await update(params).unwrap();
+            await refreshAuth().unwrap();
             toast({
                 status: "success",
                 description: "Updated account details!",
@@ -137,7 +136,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
             console.warn("Could not update user", e);
             toast({
                 status: "error",
-                description: "There was a problem deleting your account. Please try again.",
+                description: "There was a problem updating your account. Please try again.",
             });
         }
     };
