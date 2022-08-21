@@ -1,26 +1,36 @@
-import { Select } from "chakra-react-select";
+import { CreatableSelect, Select } from "chakra-react-select";
+import { Field, Form, Formik } from "formik";
 import moment from "moment";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     FaCheck, FaCheckSquare, FaCross, FaPlus, FaStickyNote, FaTimes, FaTrash, FaXing
 } from "react-icons/fa";
+import * as Yup from "yup";
 
 import {
     Box, Button, ButtonGroup, Checkbox, Editable, EditableInput, EditablePreview, EditableTextarea,
-    Flex, Heading, HStack, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent,
-    ModalFooter, ModalHeader, ModalOverlay, Popover, PopoverArrow, PopoverBody, PopoverCloseButton,
-    PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, Spacer, Spinner, Stack, Tag,
-    TagCloseButton, TagRightIcon, Text, Textarea, Tooltip, useDisclosure, useToast, VStack, Wrap,
-    WrapItem
+    Flex, FormControl, Heading, HStack, IconButton, Input, InputGroup, InputRightElement, Modal,
+    ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Popover,
+    PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader,
+    PopoverTrigger, Progress, Spacer, Spinner, Text, Textarea, Tooltip, useDisclosure, useToast,
+    VStack, Wrap, WrapItem
 } from "@chakra-ui/react";
 
 import { useDeleteCardMutation, useEditCardMutation } from "../../../../app/services/cards";
-import { useAddChecklistMutation } from "../../../../app/services/checklists";
+import {
+    useAddChecklistItemMutation, useAddChecklistMutation, useDeleteChecklistMutation,
+    useToggleChecklistItemMutation
+} from "../../../../app/services/checklists";
+import {
+    useAddCommentMutation, useDeleteCommentMutation, useEditCommentMutation
+} from "../../../../app/services/comments";
 import { useAddNotepadMutation, useDeleteNotepadMutation } from "../../../../app/services/notepads";
+import { useAssignTagsToCardMutation, useCreateTagMutation } from "../../../../app/services/tags";
 import { closeModal } from "../../../../app/slices/ui/modals";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-import { iCard, iChecklist, iNotepad } from "../../../../utils/models";
+import { useAuthContext } from "../../../../hooks/useAuthContext";
+import { iCard, iChecklist, iChecklistItem, iComment, iNotepad } from "../../../../utils/models";
 
 const modalName = "editCard";
 
@@ -119,7 +129,7 @@ export const EditCardModal: React.FC = () => {
                         <VStack mr="6" p="4" flex="3" align="stretch" spacing="12">
                             <Box>
                                 <Heading size="md">Tags</Heading>
-                                <TagBuilder cardId={target.id} />
+                                <TagBuilder card={target} />
                             </Box>
 
                             <Box>
@@ -138,12 +148,34 @@ export const EditCardModal: React.FC = () => {
                                 </Editable>
                             </Box>
 
-                            {target.checklists.length > 0 && <ChecklistBuilder card={target} />}
+                            {target.checklists.length > 0 && (
+                                <VStack align="start">
+                                    <Heading size="md">Checklists</Heading>
+                                    <VStack
+                                        align="start"
+                                        w="full"
+                                        maxH="72"
+                                        spacing="6"
+                                        overflowY="scroll"
+                                    >
+                                        {target.checklists.map(checklist => (
+                                            <ChecklistBuilder checklist={checklist} />
+                                        ))}
+                                    </VStack>
+                                </VStack>
+                            )}
                             {target.notepads.length > 0 && <NotepadBuilder card={target} />}
 
                             <VStack align="start" spacing="4">
                                 <Heading size="md">Comments</Heading>
-                                {target.comments.length > 0 && <CommentBuilder card={target} />}
+                                {target.comments.length > 0 && (
+                                    <VStack spacing="4" w="full" maxH="64" overflowY="scroll">
+                                        {target.comments.map(comment => (
+                                            <CommentDisplay comment={comment} card={target} />
+                                        ))}
+                                    </VStack>
+                                )}
+                                <CommentBuilder card={target} />
                             </VStack>
                         </VStack>
 
@@ -163,7 +195,7 @@ export const EditCardModal: React.FC = () => {
                                 </VStack>
                             </VStack>
                             <Spacer />
-                            <DueDateBuilder card={target} />
+                            {/* <DueDateBuilder card={target} /> */}
                         </Flex>
                     </Flex>
                 </ModalBody>
@@ -253,20 +285,195 @@ const DueDateBuilder: React.FC<{ card: iCard }> = ({ card }) => {
 };
 
 const CommentBuilder: React.FC<{ card: iCard }> = ({ card }) => {
-    const [comment, setComment] = useState("");
+    const toast = useToast();
+    const { user } = useAuthContext();
+    const [addComment] = useAddCommentMutation();
+
+    const handleAdd = async (content: string) => {
+        if (content === "") return;
+
+        try {
+            await addComment({
+                cardId: card.id,
+                authorId: user!.id,
+                content,
+            }).unwrap();
+            toast({
+                description: "Added comment!",
+                status: "success",
+            });
+        } catch (e) {
+            console.log(e);
+            toast({
+                description: "There was an error adding the comment. Please try again.",
+                status: "error",
+            });
+        }
+    };
 
     return (
-        <VStack>
-            {card.comments.map(comment => (
-                <VStack spacing="4">
-                    <Text fontSize="sm">{comment.content}</Text>
-                </VStack>
-            ))}
-            <Input
-                placeholder="Add a comment...."
-                onChange={(e: any) => setComment(e.target.value)}
-            />
-        </VStack>
+        <Box w="full">
+            <Formik
+                onSubmit={({ content }, { resetForm }) => {
+                    handleAdd(content);
+                    resetForm();
+                }}
+                initialValues={{
+                    content: "",
+                }}
+            >
+                {({ getFieldProps }) => (
+                    <Form autoComplete="off">
+                        <Field name="content">
+                            {(props: any) => (
+                                <InputGroup>
+                                    <Input
+                                        {...getFieldProps("content")}
+                                        id={"content"}
+                                        placeholder="Add a comment...."
+                                    />
+                                    <InputRightElement w="4rem">
+                                        <Button size="sm" type="submit">
+                                            Post
+                                        </Button>
+                                    </InputRightElement>
+                                </InputGroup>
+                            )}
+                        </Field>
+                    </Form>
+                )}
+            </Formik>
+        </Box>
+    );
+};
+
+const CommentDisplay: React.FC<{ comment: iComment; card: iCard }> = ({ comment, card }) => {
+    const toast = useToast();
+    const initialFocusRef = useRef(null);
+    const { isOpen, onClose, onOpen } = useDisclosure();
+    const { user } = useAuthContext();
+    const [isHovered, setIsHovered] = useState(false);
+    const [editedContent, setEditedContent] = useState(comment.content);
+    const [deleteComment, { isLoading: isDeleting }] = useDeleteCommentMutation();
+    const [editComment, { isLoading: isEditing }] = useEditCommentMutation();
+
+    const handleDelete = async () => {
+        try {
+            await deleteComment({
+                cardId: card.id,
+                id: comment.id,
+            }).unwrap();
+            toast({
+                description: "Deleted comment!",
+                status: "success",
+            });
+        } catch (e) {
+            toast({
+                description: "There was an error deleting the comment. Please try again.",
+                status: "error",
+            });
+        }
+    };
+
+    const handleEdit = async (content: string) => {
+        if (content === "") return;
+
+        try {
+            await editComment({
+                id: comment.id,
+                cardId: card.id,
+                content,
+            }).unwrap();
+            toast({
+                description: "Edited comment!",
+                status: "success",
+            });
+        } catch (e) {
+            toast({
+                description: "There was an error editing the comment. Please try again.",
+                status: "error",
+            });
+        }
+    };
+
+    const isLoading = isDeleting || isEditing;
+
+    if (!user) return <></>;
+
+    return (
+        <Popover
+            key={comment.id}
+            returnFocusOnClose={false}
+            isOpen={isOpen}
+            onClose={onClose}
+            initialFocusRef={initialFocusRef}
+        >
+            <Box
+                w="full"
+                minH="28"
+                p="4"
+                pos="relative"
+                borderWidth="thin"
+                borderRadius="md"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                <Text fontSize="lg">{comment.content}</Text>
+                {isHovered && (
+                    <IconButton
+                        aria-label="Delete comment"
+                        pos="absolute"
+                        top="2"
+                        right="2"
+                        size="xs"
+                        variant="ghost"
+                        onClick={handleDelete}
+                    >
+                        {isLoading ? <Spinner /> : <FaTrash />}
+                    </IconButton>
+                )}
+                <PopoverTrigger>
+                    <Button
+                        pos="absolute"
+                        bottom="2"
+                        right="2"
+                        variant="ghost"
+                        size="sm"
+                        onClick={onOpen}
+                    >
+                        Edit
+                    </Button>
+                </PopoverTrigger>
+            </Box>
+            <PopoverContent p="2" borderWidth="medium" borderColor="gray.100">
+                <PopoverArrow />
+                <PopoverBody pt="8" pb="4">
+                    <Input
+                        ref={initialFocusRef}
+                        onChange={(e: any) => setEditedContent(e.target.value)}
+                        id="content"
+                        placeholder="Edit comment...."
+                    />
+                </PopoverBody>
+                <PopoverFooter gap="4" border="0" display="flex" justifyContent="end">
+                    <ButtonGroup size="sm" isDisabled={isEditing}>
+                        <IconButton aria-label="Cancel" variant="outline" onClick={onClose}>
+                            {isEditing ? <Spinner /> : <FaTimes />}
+                        </IconButton>
+                        <IconButton
+                            aria-label="Confirm edit"
+                            variant="primary"
+                            onClick={() => {
+                                handleEdit(editedContent);
+                                onClose();
+                            }}
+                        >
+                            {isEditing ? <Spinner /> : <FaCheck />}
+                        </IconButton>
+                    </ButtonGroup>
+                </PopoverFooter>
+            </PopoverContent>
+        </Popover>
     );
 };
 
@@ -291,8 +498,12 @@ const ChecklistButton: React.FC<Pick<iChecklist, "cardId">> = ({ cardId }) => {
             await addChecklist({
                 cardId,
                 name,
-                description,
+                description: description === "" ? "No description" : description,
             }).unwrap();
+            toast({
+                description: "Added checklist!",
+                status: "success",
+            });
             onClose();
         } catch (e) {
             console.warn(e);
@@ -359,28 +570,170 @@ const ChecklistButton: React.FC<Pick<iChecklist, "cardId">> = ({ cardId }) => {
     );
 };
 
-const ChecklistBuilder: React.FC<{ card: iCard }> = ({ card }) => {
+const ChecklistBuilder: React.FC<{ checklist: iChecklist }> = ({ checklist }) => {
+    const toast = useToast();
+    const [isHovered, setIsHovered] = useState(false);
+    const [deleteChecklist, { isLoading: isDeleting }] = useDeleteChecklistMutation();
+    // get the percentage of completed items
+    const completedPercentage =
+        checklist.items.length > 0
+            ? Math.round(
+                  (checklist.items.filter(i => i.checked).length / checklist.items.length) * 100
+              )
+            : 0;
+
+    const handleDelete = async () => {
+        try {
+            await deleteChecklist({
+                id: checklist.id,
+            }).unwrap();
+            toast({
+                description: "Checklist deleted!",
+                status: "success",
+            });
+        } catch (e) {
+            console.warn(e);
+            toast({
+                description: "There was an error deleting the checklist.",
+                status: "error",
+            });
+        }
+    };
+
     return (
-        <Box>
-            <Heading size="md">Checklists</Heading>
-            <VStack spacing="4">
-                {card.checklists.map(checklist => (
-                    <VStack>
-                        <Heading size="md">{checklist.name}</Heading>
-                        <VStack>
-                            {checklist.items.map(item => (
-                                <Checkbox defaultChecked={item.checked}>{item.name}</Checkbox>
-                            ))}
-                        </VStack>
-                    </VStack>
-                ))}
-            </VStack>
-        </Box>
+        <VStack
+            w="full"
+            px="2"
+            mt="4"
+            spacing="4"
+            align="start"
+            pos="relative"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <Text fontSize="lg">{checklist.name}</Text>
+            <Text>{completedPercentage}% complete</Text>
+            <Progress w="full" size="sm" value={completedPercentage} />
+            <ChecklistItemBuilder checklist={checklist} />
+            {isHovered && (
+                <IconButton
+                    aria-label="Delete checklist"
+                    size="sm"
+                    pos="absolute"
+                    top="0"
+                    right="2"
+                    disabled={isDeleting}
+                    onClick={handleDelete}
+                >
+                    <FaTrash />
+                </IconButton>
+            )}
+        </VStack>
     );
 };
 
-const ChecklistItemBuilder: React.FC<Pick<iChecklist, "cardId">> = ({ cardId }) => {
-    return <></>;
+const ChecklistItemDisplay: React.FC<{ item: iChecklistItem }> = ({ item }) => {
+    const toast = useToast();
+    const [toggleCheck] = useToggleChecklistItemMutation();
+
+    const handleCheck = async () => {
+        try {
+            await toggleCheck({
+                id: item.id,
+            }).unwrap();
+        } catch (e) {
+            console.warn(e);
+            toast({
+                description: "There was an error toggling the checklist item.",
+                status: "error",
+            });
+        }
+    };
+
+    return (
+        <Checkbox key={item.id} defaultChecked={item.checked} onChange={(e: any) => handleCheck()}>
+            <Text as={item.checked ? "s" : undefined}>{item.name}</Text>
+        </Checkbox>
+    );
+};
+
+const ChecklistItemBuilder: React.FC<{ checklist: iChecklist }> = ({ checklist }) => {
+    const toast = useToast();
+    const [addItem] = useAddChecklistItemMutation();
+    const [name, setName] = useState("");
+    const [isAddingMode, setIsAddingMode] = useState(false);
+    const ref = useRef<HTMLInputElement>(null);
+
+    const handleAdd = async () => {
+        if (name === "") return;
+
+        try {
+            await addItem({
+                checklistId: checklist.id,
+                name,
+            }).unwrap();
+            toast({
+                description: "Added checklist item!",
+                status: "success",
+            });
+            ref.current?.blur();
+            setIsAddingMode(false);
+        } catch (e) {
+            console.warn(e);
+            toast({
+                description: "There was an error adding the checklist item.",
+                status: "error",
+            });
+        }
+    };
+
+    return (
+        <>
+            <VStack align="start" spacing="2">
+                {checklist.items.map(item => (
+                    <ChecklistItemDisplay item={item} />
+                ))}
+            </VStack>
+            {isAddingMode && (
+                <InputGroup>
+                    <Input
+                        ref={ref}
+                        autoFocus
+                        placeholder="Name"
+                        onChange={(e: any) => setName(e.target.value)}
+                    />
+                    <InputRightElement>
+                        <IconButton
+                            aria-label="Add checklist item"
+                            size="sm"
+                            variant="primary"
+                            onClick={handleAdd}
+                        >
+                            <FaCheck />
+                        </IconButton>
+                    </InputRightElement>
+                </InputGroup>
+            )}
+            <HStack>
+                {isAddingMode && (
+                    <Button
+                        size="sm"
+                        onClick={() => {
+                            ref.current?.blur();
+                            setIsAddingMode(false);
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                )}
+                {!isAddingMode && (
+                    <Button size="sm" onClick={() => setIsAddingMode(!isAddingMode)}>
+                        Add Item
+                    </Button>
+                )}
+            </HStack>
+        </>
+    );
 };
 
 const NotepadButton: React.FC<Pick<iNotepad, "cardId">> = ({ cardId }) => {
@@ -503,36 +856,57 @@ const NotepadBuilder: React.FC<{ card: iCard }> = ({ card }) => {
     );
 };
 
-const TagBuilder: React.FC<{ cardId: string }> = ({ cardId }) => {
+const TagBuilder: React.FC<{ card: iCard }> = ({ card }) => {
+    const toast = useToast();
+    const [createTag, { isLoading: isCreating }] = useCreateTagMutation();
+    const [assignTags, { isLoading: isAssigning }] = useAssignTagsToCardMutation();
     const currentBoard = useAppSelector(state => state.boards.current);
 
-    const options = [
-        {
-            value: "COMT",
-            label: "COMT",
-        },
-        {
-            value: "UXID",
-            label: "UXID",
-        },
-        {
-            value: "NETY",
-            label: "NETY",
-        },
-    ];
+    const isLoading = isCreating || isAssigning;
 
     if (!currentBoard) return <></>;
 
+    const handleCreateTag = async (name: string) => {
+        try {
+            await createTag({ boardId: currentBoard.id, name }).unwrap();
+        } catch (e) {
+            console.warn(e);
+            toast({
+                description: "There was an error creating the tag.",
+                status: "error",
+            });
+        }
+    };
+
+    console.log(card.tags);
+
+    const handleAssignTags = async (tagIds: string[]) => {
+        try {
+            await assignTags({ cardId: card.id, tagIds }).unwrap();
+        } catch (e) {
+            console.warn(e);
+            toast({
+                description: "There was an error assigning the tags.",
+                status: "error",
+            });
+        }
+    };
+
     return (
         <Box mt="4">
-            <Select
+            <CreatableSelect
+                defaultValue={card.tags.map(tag => ({ value: tag.id, label: tag.name }))}
+                isDisabled={isLoading}
+                isClearable={false}
                 size="md"
                 options={currentBoard.tags.map(tag => ({
-                    value: tag.name,
+                    value: tag.id,
                     label: tag.name,
                 }))}
                 isMulti
-                backspaceRemovesValue
+                backspaceRemovesValue={false}
+                onCreateOption={handleCreateTag}
+                onChange={values => handleAssignTags(values.map(v => v.value))}
             />
         </Box>
     );
