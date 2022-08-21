@@ -1,6 +1,7 @@
 import cacheUtils from "../../utils/cacheUtils";
 import { iChecklist, iChecklistItem } from "../../utils/models";
 import api, { ApiTags } from "./api";
+import cardService from "./cards";
 
 const checklistService = api.injectEndpoints({
     endpoints: builder => ({
@@ -33,11 +34,11 @@ const checklistService = api.injectEndpoints({
             invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
         }),
 
-        addChecklistItem: builder.mutation<void, Pick<iChecklist, "id" | "name">>({
-            query: ({ id, name }) => ({
+        addChecklistItem: builder.mutation<void, Pick<iChecklistItem, "checklistId" | "name">>({
+            query: ({ checklistId, name }) => ({
                 url: `/checklist_items`,
                 method: "POST",
-                body: { name },
+                body: { checklistId, name },
             }),
 
             invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
@@ -63,7 +64,7 @@ const checklistService = api.injectEndpoints({
     }),
 });
 
-export const { 
+export const {
     useAddChecklistMutation,
     useDeleteChecklistMutation,
     useAddChecklistItemMutation,
