@@ -120,16 +120,7 @@ const cardService = api.injectEndpoints({
 
             invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
         }),
-
-        addCardTag: builder.mutation<void, { cardId: iCard["id"]; tagId: iTag["id"] }>({
-            query: ({ cardId, tagId }) => ({
-                url: `/cards/${cardId}/tags/${tagId}`,
-                method: "PUT",
-            }),
-
-            invalidatesTags: cacheUtils.invalidatesList(ApiTags.Cards),
-        }),
-
+        
         deleteCardTag: builder.mutation<void, { cardId: iCard["id"]; tagId: iTag["id"] }>({
             query: ({ cardId, tagId }) => ({
                 url: `/cards/${cardId}/tags/${tagId}`,
