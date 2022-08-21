@@ -6,3 +6,4 @@ export type { iChecklist, iChecklistItem } from "./components/Checklist";
 export type { iComponent } from "./components/Component";
 export type { iNotepad } from "./components/Notepad";
 export type { iTag } from "./components/Tag";
+export type { iComment } from "./components/Comment";
