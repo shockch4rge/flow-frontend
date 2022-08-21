@@ -94,29 +94,14 @@ const folderService = api.injectEndpoints({
         }),
 
         moveFolder: builder.mutation<void, Pick<iFolder, "id" | "boardId"> & { index: number }>({
-            query: ({ id, index }) => ({
+            query: ({ id, boardId, index }) => ({
                 url: `/folders/${id}/move`,
                 method: "PUT",
                 body: {
+                    boardId,
                     index,
                 },
             }),
-
-            onQueryStarted: async ({ id, boardId, index }, { dispatch, queryFulfilled }) => {
-                const patchResult = dispatch(
-                    folderService.util.updateQueryData("getBoardFolders", boardId, folders => {
-                        console.log(folders.find(folder => folder.id === id));
-
-                        Object.assign(folders.find(folder => folder.id === id)!, index);
-                    })
-                );
-
-                try {
-                    await queryFulfilled;
-                } catch (e) {
-                    patchResult.undo();
-                }
-            },
 
             invalidatesTags: cacheUtils.invalidatesList(ApiTags.Folders),
         }),

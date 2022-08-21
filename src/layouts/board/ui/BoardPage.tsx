@@ -59,6 +59,8 @@ export const BoardPage: React.FC<{}> = props => {
     }, [currentBoard]);
 
     const onDragEnd = useCallback(async (result: DropResult) => {
+        if (!currentBoard) return;
+
         const { destination, source, draggableId, type } = result;
 
         if (!destination) return;
@@ -66,7 +68,11 @@ export const BoardPage: React.FC<{}> = props => {
             return;
 
         if (type === "folder") {
-            console.log("moving folder");
+            await moveFolder({
+                id: draggableId,
+                boardId: currentBoard.id,
+                index: destination.index,
+            }).unwrap();
             return;
         }
 
